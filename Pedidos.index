@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú | La Casa Del Arroz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* PROTECCIÓN ADICIONAL CSS */
+        img { 
+            -webkit-user-drag: none; 
+            -khtml-user-drag: none; 
+            -moz-user-drag: none; 
+            -o-user-drag: none; 
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body { background-color: #0b0b0b; color: #ffffff; font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding-bottom: 220px; }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; text-align: center; }
+        
+        header { padding: 30px 0; }
+        .logo-box { display: inline-block; border: 3px solid white; padding: 8px 12px; font-size: 2rem; font-weight: bold; margin: 2px; }
+        .logo-po { position: relative; top: 15px; }
+
+        .nota-uso { background-color: #111; border: 2px dashed #0026ff; padding: 15px; margin: 20px auto; border-radius: 10px; text-align: left; }
+        .nota-uso strong { color: #0026ff; display: block; margin-bottom: 5px; }
+
+        .location-box { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 25px; text-align: left; }
+        .delivery-btns { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .btn-loc, .btn-pickup { flex: 1; min-width: 140px; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
+        
+        .btn-loc { background: #333; border: 1px solid #444; } 
+        .btn-pickup { background: #333; border: 1px solid #444; }
+        
+        .btn-loc.active { background: #0026ff; border: none; } 
+        .btn-pickup.active { background: #ff9900; border: none; } 
+
+        .name-input { width: 100%; background: #0f0f0f; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; margin-top: 15px; box-sizing: border-box; outline: none; font-size: 1rem; }
+        .name-input:focus { border-color: #0026ff; }
+
+        .category-btn { background-color: #111; color: #fff; width: 100%; padding: 15px; margin-bottom: 10px; border: 1px solid #333; border-radius: 12px; text-align: left; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .category-content { display: none; background: #161616; padding: 15px; border-radius: 0 0 12px 12px; border: 1px solid #333; border-top: none; margin-top: -10px; margin-bottom: 15px; }
+
+        .menu-item { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid #222; padding-bottom: 12px; }
+        .item-main { display: flex; align-items: center; gap: 12px; width: 100%; }
+        .item-img { width: 75px; height: 75px; border-radius: 10px; object-fit: cover; background-color: #222; cursor: zoom-in; border: 1px solid #333; }
+        
+        .item-info { text-align: left; flex-grow: 1; }
+        .item-title { font-weight: bold; font-size: 0.95rem; color: #fff; }
+        .item-price { color: #0026ff; font-weight: bold; font-size: 0.85rem; }
+        
+        .item-controls { display: flex; align-items: center; gap: 5px; }
+        .btn-qty { background: #333; border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .qty-input { width: 45px; height: 28px; background: transparent; border: 1px solid #444; color: white; text-align: center; border-radius: 4px; font-weight: bold; font-size: 1rem; }
+
+        .item-note { width: 100%; background: #0f0f0f; border: 1px solid #333; color: #888; font-size: 0.8rem; padding: 8px; border-radius: 6px; box-sizing: border-box; outline: none; }
+
+        .cart-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; border-top: 2px solid #0026ff; z-index: 1000; text-align: center; }
+        .total-container { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
+        .footer-btns { display: flex; justify-content: center; align-items: center; gap: 15px; }
+        .btn-ticket { background: #222; border: 1px solid #0026ff; color: #fff; padding: 6px 12px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
+        .btn-send { background-color: #25D366; color: white; padding: 14px 0; border-radius: 50px; font-weight: bold; width: 95%; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px auto 0; cursor: pointer; border: none; font-size: 1.1rem; }
+
+        .modal-overlay { display: none; position: fixed; z-index: 2100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal-box { background: white; color: black; padding: 25px; border-radius: 12px; width: 85%; max-width: 350px; text-align: center; }
+        .pay-option-btn { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #f0f0f0; border-radius: 8px; font-weight: bold; cursor: pointer; background: #fafafa; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; color: #333; }
+        
+        .ticket-style { font-family: 'Courier New', Courier, monospace; background: white; color: black; padding: 25px; border-radius: 5px; width: 85%; max-width: 350px; text-align: center; }
+        .ticket-header { border-bottom: 1px dashed #000; margin-bottom: 15px; padding-bottom: 15px; }
+        .ticket-logo-box { display: inline-block; border: 2px solid black; padding: 4px 6px; font-size: 1.2rem; font-weight: bold; font-family: sans-serif; margin: 1px; color: black; }
+        .ticket-logo-po { position: relative; top: 8px; }
+
+        #zoomModal { background-color: rgba(0, 0, 0, 0.95); cursor: zoom-out; }
+        #zoomModal img { max-width: 95%; max-height: 85%; border-radius: 10px; }
+    </style>
+</head>
+<body oncontextmenu="return false;"> <div class="container">
+    <header>
+        <div class="logo-box">Co</div>
+        <div class="logo-box logo-po">Po</div>
+        <h2 style="margin-top: 40px; letter-spacing: 2px; font-size: 1.2rem;">99.1% CALIDAD</h2>
+    </header>
+
+    <div class="nota-uso">
+        <strong>⚠️ NOTA IMPORTANTE:</strong>
+        <span>• <b>Si estás en casa:</b> Seleccioná tus productos y envianos tu pedido por WhatsApp.<br>• <b>Si estás en el local:</b> puedes mirar el menú y hacer tu pedido en caja.</span>
+    </div>
+
+    <div class="location-box">
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">¿Cómo recibirás tu pedido?</p>
+        <div class="delivery-btns">
+            <button class="btn-loc" id="btn-location" onclick="setExpress()">
+                <i class="fas fa-motorcycle"></i> EXPRESS
+            </button>
+            <button class="btn-pickup" id="btn-pickup" onclick="setPickup()">
+                <i class="fas fa-store"></i> PASO A RETIRAR
+            </button>
+        </div>
+        <input type="text" id="user-name" class="name-input" placeholder="Tu nombre por favor...">
+    </div>
+
+    <button class="category-btn" onclick="toggle('c1')">🍗 Pollo Frito <span>▼</span></button>
+    <div id="c1" class="category-content">
+        <div class="menu-item">
+            <div class="item-main">
+                <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?q=80&w=200&auto=format&fit=crop" class="item-img" onclick="zoomImg(this.src)" onmousedown="return false;">
+                <div class="item-info"><span class="item-title">Pieza de Pollo</span><span class="item-price">₡1,950</span></div>
+                <div class="item-controls">
+                    <button class="btn-qty" onclick="changeQty('Pieza de Pollo', -1, 1950)">-</button>
+                    <input type="number" id="qty-Pieza de Pollo" class="qty-input" value="0" onchange="manualQty('Pieza de Pollo', this.value, 1950)">
+                    <button class="btn-qty" onclick="changeQty('Pieza de Pollo', 1, 1950)">+</button>
+                </div>
+            </div>
+            <input type="text" id="note-Pieza de Pollo" class="item-note" placeholder="indicanos tu comentario">
+        </div>
+    </div>
+
+    <button class="category-btn" onclick="toggle('c2')">⭐ Papas Premium <span>▼</span></button>
+    <div id="c2" class="category-content">
+        <div class="menu-item">
+            <div class="item-main">
+                <img src="https://images.unsplash.com/photo-1576107232684-1279f390859f?q=80&w=200&auto=format&fit=crop" class="item-img" onclick="zoomImg(this.src)" onmousedown="return false;">
+                <div class="item-info"><span class="item-title">Papas con Cheddar</span><span class="item-price">₡1,500</span></div>
+                <div class="item-controls">
+                    <button class="btn-qty" onclick="changeQty('Papas con Cheddar', -1, 1500)">-</button>
+                    <input type="number" id="qty-Papas con Cheddar" class="qty-input" value="0" onchange="manualQty('Papas con Cheddar', this.value, 1500)">
+                    <button class="btn-qty" onclick="changeQty('Papas con Cheddar', 1, 1500)">+</button>
+                </div>
+            </div>
+            <input type="text" id="note-Papas con Cheddar" class="item-note" placeholder="indicanos tu comentario">
+        </div>
+    </div>
+
+    <button class="category-btn" onclick="toggle('c3')">🍟 Papas Fritas <span>▼</span></button>
+    <div id="c3" class="category-content">
+        <div class="menu-item">
+            <div class="item-main">
+                <img src="https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?q=80&w=200&auto=format&fit=crop" class="item-img" onclick="zoomImg(this.src)" onmousedown="return false;">
+                <div class="item-info"><span class="item-title">Papas Regulares</span><span class="item-price">₡1,000</span></div>
+                <div class="item-controls">
+                    <button class="btn-qty" onclick="changeQty('Papas Regulares', -1, 1000)">-</button>
+                    <input type="number" id="qty-Papas Regulares" class="qty-input" value="0" onchange="manualQty('Papas Regulares', this.value, 1000)">
+                    <button class="btn-qty" onclick="changeQty('Papas Regulares', 1, 1000)">+</button>
+                </div>
+            </div>
+            <input type="text" id="note-Papas Regulares" class="item-note" placeholder="indicanos tu comentario">
+        </div>
+    </div>
+
+    <button class="category-btn" onclick="toggle('c4')">🥤 Refrescos 500ml <span>▼</span></button>
+    <div id="c4" class="category-content">
+        <div class="menu-item">
+            <div class="item-main">
+                <img src="https://images.unsplash.com/photo-1543253687-c931c8e01820?q=80&w=200&auto=format&fit=crop" class="item-img" onclick="zoomImg(this.src)" onmousedown="return false;">
+                <div class="item-info"><span class="item-title">Natural MFS 500ml</span><span class="item-price">₡1,000</span></div>
+                <div class="item-controls">
+                    <button class="btn-qty" onclick="changeQty('Natural MFS 500ml', -1, 1000)">-</button>
+                    <input type="number" id="qty-Natural MFS 500ml" class="qty-input" value="0" onchange="manualQty('Natural MFS 500ml', this.value, 1000)">
+                    <button class="btn-qty" onclick="changeQty('Natural MFS 500ml', 1, 1000)">+</button>
+                </div>
+            </div>
+            <input type="text" id="note-Natural MFS 500ml" class="item-note" placeholder="indicanos tu comentario">
+        </div>
+    </div>
+
+    <button class="category-btn" onclick="toggle('c5')">🥤 Tropical y Gaseosas <span>▼</span></button>
+    <div id="c5" class="category-content">
+        <div class="menu-item">
+            <div class="item-main">
+                <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=200&auto=format&fit=crop" class="item-img" onclick="zoomImg(this.src)" onmousedown="return false;">
+                <div class="item-info"><span class="item-title">Bebida Envasada</span><span class="item-price">₡1,200</span></div>
+                <div class="item-controls">
+                    <button class="btn-qty" onclick="changeQty('Bebida Envasada', -1, 1200)">-</button>
+                    <input type="number" id="qty-Bebida Envasada" class="qty-input" value="0" onchange="manualQty('Bebida Envasada', this.value, 1200)">
+                    <button class="btn-qty" onclick="changeQty('Bebida Envasada', 1, 1200)">+</button>
+                </div>
+            </div>
+            <input type="text" id="note-Bebida Envasada" class="item-note" placeholder="indicanos tu comentario">
+        </div>
+    </div>
+
+    <button class="category-btn" onclick="toggle('c6')">🍯 Aderezos <span>▼</span></button>
+    <div id="c6" class="category-content">
+        <div class="menu-item">
+            <div class="item-main">
+                <img src="https://images.unsplash.com/photo-1475332433629-a2046c85e85f?q=80&w=200&auto=format&fit=crop" class="item-img" onclick="zoomImg(this.src)" onmousedown="return false;">
+                <div class="item-info"><span class="item-title">Salsa Zafran Extra</span><span class="item-price">₡300</span></div>
+                <div class="item-controls">
+                    <button class="btn-qty" onclick="changeQty('Salsa Zafran Extra', -1, 300)">-</button>
+                    <input type="number" id="qty-Salsa Zafran Extra" class="qty-input" value="0" onchange="manualQty('Salsa Zafran Extra', this.value, 300)">
+                    <button class="btn-qty" onclick="changeQty('Salsa Zafran Extra', 1, 300)">+</button>
+                </div>
+            </div>
+            <input type="text" id="note-Salsa Zafran Extra" class="item-note" placeholder="indicanos tu comentario">
+        </div>
+    </div>
+
+    <div class="cart-footer">
+        <div class="total-container">Total Orden: ₡<span id="grand-total">0</span></div>
+        <div class="footer-btns">
+            <button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button>
+        </div>
+        <button class="btn-send" onclick="openPayModal()">
+            <i class="fab fa-whatsapp"></i> ENVIAR PEDIDO
+        </button>
+    </div>
+</div>
+
+<div id="zoomModal" class="modal-overlay" onclick="this.style.display='none'">
+    <img id="imgZoomed" src="" oncontextmenu="return false;" onmousedown="return false;">
+</div>
+
+<div id="ticketModal" class="modal-overlay" onclick="closeModals()">
+    <div class="ticket-style" onclick="event.stopPropagation()">
+        <div class="ticket-header">
+            <div class="ticket-logo-box">Co</div>
+            <div class="ticket-logo-box ticket-logo-po">Po</div>
+        </div>
+        <div id="ticket-list" style="text-align: left; font-size: 0.85rem;"></div>
+        <div style="border-top:1px dashed #000; margin-top:15px; padding-top:10px; font-weight:bold; display:flex; justify-content:space-between; font-size:1.1rem;">
+            <span>TOTAL:</span><span>₡<span id="t-total">0</span></span>
+        </div>
+        <button style="margin-top:20px; width:100%; padding:12px; background:#0026ff; color:white; border:none; border-radius:5px; font-weight:bold;" onclick="closeModals()">CERRAR</button>
+    </div>
+</div>
+
+<div id="payModal" class="modal-overlay" onclick="closeModals()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0;">💳 Método de Pago</h3>
+        <button class="pay-option-btn" onclick="showSinpe()"><i class="fas fa-mobile-alt" style="color:#0026ff"></i> SINPE MÓVIL</button>
+        <button class="pay-option-btn" onclick="sendWhatsApp('EFECTIVO')"><i class="fas fa-money-bill-wave" style="color:#25D366"></i> EFECTIVO</button>
+    </div>
+</div>
+
+<div id="sinpeModal" class="modal-overlay" onclick="closeModals()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <h3>📲 Datos SINPE</h3>
+        <div style="background:#f0f4ff; border:2px solid #0026ff; padding:15px; border-radius:8px;">
+            <span style="font-size:1.4rem; font-weight:bold; color:#0026ff;">8513-5269</span><br>
+            <span style="font-size:0.85rem; font-weight:600;">Jesús Antonio Madrigal Barrientos</span>
+        </div>
+        <button class="btn-send" style="width:100%; margin-top:15px;" onclick="sendWhatsApp('SINPE')">CONFIRMAR Y ENVIAR</button>
+    </div>
+</div>
+
+<script>
+    let cart = {}; let total = 0; let deliveryMode = ""; let isSelected = false;
+
+    function toggle(id) { 
+        let el = document.getElementById(id); 
+        el.style.display = (el.style.display === "block") ? "none" : "block"; 
+    }
+    
+    function changeQty(name, val, price) {
+        if (!cart[name]) cart[name] = { qty: 0, price: price };
+        manualQty(name, cart[name].qty + val, price);
+    }
+
+    function manualQty(name, value, price) {
+        if (!cart[name]) cart[name] = { qty: 0, price: price };
+        let newQty = parseInt(value) || 0;
+        if (newQty < 0) newQty = 0;
+        total += (newQty - cart[name].qty) * price;
+        cart[name].qty = newQty;
+        document.getElementById('qty-' + name).value = cart[name].qty;
+        document.getElementById('grand-total').innerText = total.toLocaleString();
+    }
+
+    function zoomImg(src) { 
+        document.getElementById('imgZoomed').src = src; 
+        document.getElementById('zoomModal').style.display = "flex"; 
+    }
+
+    function setExpress() {
+        deliveryMode = "ENVÍO EXPRESS";
+        isSelected = true;
+        document.getElementById('btn-location').classList.add('active');
+        document.getElementById('btn-pickup').classList.remove('active');
+        document.getElementById('btn-location').innerHTML = '<i class="fas fa-check"></i> EXPRESS SELECCIONADO';
+        document.getElementById('btn-pickup').innerHTML = '<i class="fas fa-store"></i> PASO A RETIRAR';
+    }
+
+    function setPickup() {
+        deliveryMode = "RETIRO EN LOCAL";
+        isSelected = true;
+        document.getElementById('btn-pickup').classList.add('active');
+        document.getElementById('btn-location').classList.remove('active');
+        document.getElementById('btn-pickup').innerHTML = '<i class="fas fa-check"></i> LISTO PARA RETIRO';
+        document.getElementById('btn-location').innerHTML = '<i class="fas fa-motorcycle"></i> EXPRESS';
+    }
+
+    function showTicket() {
+        let listHtml = ""; let hasItems = false;
+        for (let item in cart) {
+            if (cart[item].qty > 0) {
+                let note = document.getElementById('note-' + item).value;
+                listHtml += `<div style="margin-bottom:8px;"><div style="display:flex; justify-content:space-between;"><span>${cart[item].qty}x ${item}</span><span>₡${(cart[item].qty * cart[item].price).toLocaleString()}</span></div>${note ? `<small style="color:#666; font-style:italic;">"${note}"</small>` : ""}</div>`;
+                hasItems = true;
+            }
+        }
+        if (!hasItems) { alert("Agrega productos."); return; }
+        document.getElementById('ticket-list').innerHTML = listHtml;
+        document.getElementById('t-total').innerText = total.toLocaleString();
+        document.getElementById('ticketModal').style.display = "flex";
+    }
+
+    function openPayModal() { 
+        if (total <= 0) { 
+            alert("Agrega productos al carrito primero."); 
+            return; 
+        }
+        if (!isSelected) { 
+            alert("Por favor selecciona si necesitas Express o pasarás a Retirar."); 
+            return; 
+        }
+        document.getElementById('payModal').style.display = "flex"; 
+    }
+
+    function showSinpe() { 
+        document.getElementById('payModal').style.display = "none"; 
+        document.getElementById('sinpeModal').style.display = "flex"; 
+    }
+    
+    function closeModals() { 
+        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = "none"); 
+    }
+
+    function sendWhatsApp(method) {
+        let userName = document.getElementById('user-name').value.trim();
+        if (userName === "") { 
+            alert("Por favor escribe tu nombre para el pedido."); 
+            return; 
+        }
+
+        let msg = `¡Hola La Casa Del Arroz! 🍗%0A*${deliveryMode}*%0A*Cliente:* ${userName}%0A%0A`;
+        
+        for (let item in cart) {
+            if (cart[item].qty > 0) {
+                let note = document.getElementById('note-' + item).value;
+                msg += `• ${cart[item].qty}x ${item}${note ? ' ('+note+')' : ''}%0A`;
+            }
+        }
+        msg += `%0A*Subtotal Orden: ₡${total.toLocaleString()}*%0A*Pago: ${method}*`;
+        
+        if (deliveryMode === "ENVÍO EXPRESS") {
+            msg += `%0A%0A⚠️ _Favor coordinar costo de envío por este medio._`;
+        }
+        
+        window.location.href = "https://wa.me/50685135269?text=" + msg;
+    }
+</script>
+</body>
+</html>
