@@ -108,11 +108,10 @@
         .ticket-style { font-family: 'Courier New', Courier, monospace; background: white; color: black; padding: 25px; border-radius: 5px; width: 85%; max-width: 350px; text-align: center; }
         .ticket-header { border-bottom: 1px dashed #000; margin-bottom: 15px; padding-bottom: 15px; }
 
-        /* ESTILO PARA TIQUETES DE HISTORIAL DE ADMINISTRACIÓN */
         .admin-ticket-card {
             background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace;
             padding: 16px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #0026ff; text-align: left;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 0.82rem; line-height: 1.4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 0.82rem; line-height: 1.4; position: relative;
         }
 
         #zoomModal { background-color: rgba(0, 0, 0, 0.95); cursor: zoom-out; }
@@ -212,7 +211,7 @@
         </div>
     </div>
 
-    <p class="version-tag">Versión 13.7.0 (Historial & Analytics)</p>
+    <p class="version-tag">Versión 13.8.0 (Filtro por Fecha, Totales y GPS Exacto)</p>
 
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span></div>
@@ -226,7 +225,6 @@
 
 <div id="zoomModal" class="modal-overlay" onclick="closeZoomModal()"></div>
 
-<!-- MODAL DESGLOSE DE VISITAS DIARIAS (RELOJ) -->
 <div id="visitasModal" class="modal-overlay" onclick="closeModalTop()">
     <div class="modal-box" onclick="event.stopPropagation()" style="background: #141414; color: white; border: 2px solid #00ffcc; max-width: 380px; max-height: 80vh; overflow-y: auto; text-align: left;">
         <h3 style="margin-top:0; color:#00ffcc; text-align:center;"><i class="fas fa-history"></i> Historial de Visitas por Día</h3>
@@ -247,10 +245,10 @@
 
 <div id="customConfirmModal" class="modal-overlay" style="z-index: 9999;">
     <div class="modal-box" onclick="event.stopPropagation()" style="background: #141414; color: white; border: 2px solid #ea4335; max-width: 320px; text-align: center; padding: 25px; border-radius: 12px;">
-        <h3 id="confirmTitle" style="margin-top:0; color: #ea4335; font-size: 1.2rem;"><i class="fas fa-exclamation-triangle"></i> ¿Eliminar Archivo?</h3>
+        <h3 id="confirmTitle" style="margin-top:0; color: #ea4335; font-size: 1.2rem;"><i class="fas fa-exclamation-triangle"></i> ¿Confirmar Acción?</h3>
         <p id="confirmMessage" style="font-size: 0.95rem; color: #ccc; margin: 15px 0 20px 0; line-height: 1.4; text-align: center;"></p>
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button id="btn-confirm-yes" class="btn-admin-delete" style="flex:1; height:40px; font-weight:bold;">Sí, Eliminar</button>
+            <button id="btn-confirm-yes" class="btn-admin-delete" style="flex:1; height:40px; font-weight:bold;">Sí, Continuar</button>
             <button class="btn-admin-save" onclick="closeModalTop()" style="flex:1; height:40px; background:#222; border:1px solid #444; color:white; font-weight:bold;">Cancelar</button>
         </div>
     </div>
@@ -348,7 +346,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v13.7.0)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v13.8.0)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -367,19 +365,43 @@
                 <div>Total Dispositivos: <b id="stat-devices-all" style="color: #00ffcc;">0</b></div>
                 <div>Total Visitas: <b id="stat-views-all" style="color: #25D366;">0</b></div>
             </div>
-            <!-- BOTÓN CON ICONO DE RELOJ PARA DESGLOSE DIARIO DE VISITAS -->
             <button class="btn-ticket" style="width: 100%; background: #0b0b0b; border-color: #00ffcc; color: #00ffcc; font-weight: bold; padding: 8px;" onclick="openHistorialVisitasModal()">
                 <i class="fas fa-clock"></i> Ver Desglose Diario de Visitas (Reloj)
             </button>
         </div>
 
-        <!-- SECCIÓN TIQUETERA / HISTORIAL DE PEDIDOS -->
+        <!-- SECCIÓN TIQUETERA / HISTORIAL DE PEDIDOS Y BÚSQUEDA POR DÍA -->
         <div class="admin-section-title"><i class="fas fa-receipt"></i> Historial de Pedidos (Tiquetera)</div>
         <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-orders-block', 'orders')" style="background:#222; color:white; border-color:#333; margin-bottom:15px;">
             <i class="fas fa-receipt"></i> Ver Historial de Pedidos Guardados
         </button>
         
-        <div id="admin-orders-block" style="display:none; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
+        <div id="admin-orders-block" style="display:none; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
+            
+            <!-- SELECTOR DE FECHA / HISTORIAL POR DÍA -->
+            <div style="background:#0e0e0e; border:1px solid #0026ff; padding:10px; border-radius:8px; margin-bottom:12px;">
+                <label style="display:block; font-size:0.8rem; color:#00ffcc; font-weight:bold; margin-bottom:6px;">
+                    <i class="fas fa-calendar-alt"></i> Filtrar Historial por Día:
+                </label>
+                <div style="display:flex; gap:8px;">
+                    <select id="admin-orders-date-select" class="admin-input" onchange="filterAdminOrdersBySelectedDate()" style="flex:1; margin-bottom:0;">
+                        <option value="ALL">Cargando fechas disponibles...</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- CONTADORES TOTALES DEL DÍA -->
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="flex:1; background:rgba(0,255,204,0.08); border:1px solid #00ffcc; padding:10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:0.68rem; color:#aaa; font-weight:bold;">PEDIDOS DEL DÍA</div>
+                    <div id="stat-orders-count" style="font-size:1.3rem; font-weight:bold; color:#00ffcc;">0</div>
+                </div>
+                <div style="flex:1; background:rgba(37,211,102,0.08); border:1px solid #25D366; padding:10px; border-radius:8px; text-align:center;">
+                    <div style="font-size:0.68rem; color:#aaa; font-weight:bold;">VENTAS TOTALES (₡)</div>
+                    <div id="stat-orders-money" style="font-size:1.3rem; font-weight:bold; color:#25D366;">₡0</div>
+                </div>
+            </div>
+
             <div id="admin-orders-list-container">Cargando tiquetes guardados...</div>
         </div>
 
@@ -504,6 +526,7 @@
     window.localTextBannersArray = [];
     
     window.globalGalleryArray = [];
+    window.rawOrdersList = []; 
     let galleryTarget = { type: '', catIdx: null, prodIdx: null, bannerIdx: null };
 
     let modalStack = [];
@@ -673,7 +696,6 @@
         }).catch(err => console.error(err));
     }
 
-    /* MOTOR DE BÚSQUEDA Y RENDERS DEL DESGLOSE DE VISITAS DIARIAS (RELOJ) */
     function openHistorialVisitasModal() {
         let grid = document.getElementById('visitas-diarias-grid');
         grid.innerHTML = `<p style="color:#aaa; font-style:italic; text-align:center;">Cargando historial de días...</p>`;
@@ -688,7 +710,6 @@
             let docsArray = [];
             snapshot.forEach(doc => { docsArray.push(doc.data()); });
             
-            // Ordenar por fecha descendente
             docsArray.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
 
             let html = "";
@@ -729,7 +750,7 @@
         });
     }
 
-    /* CARGAR Y MOSTRAR HISTORIAL DE PEDIDOS EN PANEL ADMIN */
+    /* CARGAR HISTORIAL DE PEDIDOS, FILTRO POR DÍA Y CONTADORES */
     function cargarHistorialPedidosAdmin() {
         let container = document.getElementById('admin-orders-list-container');
         if (!container) return;
@@ -737,76 +758,162 @@
 
         db.collection("pedidos").get().then(snapshot => {
             if (snapshot.empty) {
+                window.rawOrdersList = [];
                 container.innerHTML = `<p style="color:#888; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">No hay pedidos registrados en la tiquetera.</p>`;
+                actualizarContadoresPedidos([]);
+                poblarSelectorFechasOrders([]);
                 return;
             }
 
-            let ordersList = [];
-            snapshot.forEach(doc => { ordersList.push(doc.data()); });
-
-            // Ordenar pedidos por timestamp más reciente primero
-            ordersList.sort((a, b) => (b.timestampRaw || 0) - (a.timestampRaw || 0));
-
-            let html = "";
-            let currentDayHeader = "";
-
-            ordersList.forEach(ord => {
-                if (ord.fechaStr !== currentDayHeader) {
-                    currentDayHeader = ord.fechaStr;
-                    html += `<div style="background:#0026ff; color:white; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:4px; margin:15px 0 10px 0; letter-spacing:1px; text-transform:uppercase;"><i class="fas fa-calendar-day"></i> Pedidos del Día: ${currentDayHeader}</div>`;
-                }
-
-                let gpsLinkHtml = "";
-                if (ord.gps) {
-                    gpsLinkHtml = `<div style="margin-top:4px;"><i class="fas fa-map-marker-alt" style="color:#0026ff;"></i> <b>Ruta GPS:</b> <a href="https://maps.google.com/?q=${ord.gps}" target="_blank" style="color:#0026ff; font-weight:bold; text-decoration:underline;">Ver en Google Maps</a></div>`;
-                }
-
-                let itemsHtml = "";
-                if (ord.items && Array.isArray(ord.items)) {
-                    ord.items.forEach(it => {
-                        itemsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>${it.qty}x ${it.name}</span><span>₡${(it.qty * it.price).toLocaleString()}</span></div>`;
-                        if (it.notes) {
-                            itemsHtml += `<div style="color:#555; font-style:italic; font-size:0.75rem; margin-bottom:4px;">"${it.notes}"</div>`;
-                        }
-                    });
-                }
-
-                let cashDetails = "";
-                if (ord.metodoPago && ord.metodoPago.includes('EFECTIVO')) {
-                    if (ord.vuelto > 0) {
-                        cashDetails = `<div style="font-size:0.78rem; color:#444; margin-top:2px;">Paga con: ₡${(ord.pagaCon || 0).toLocaleString()} | Vuelto: ₡${(ord.vuelto || 0).toLocaleString()}</div>`;
-                    } else {
-                        cashDetails = `<div style="font-size:0.78rem; color:#444; margin-top:2px;">Paga con Monto Exacto</div>`;
-                    }
-                }
-
-                html += `
-                    <div class="admin-ticket-card">
-                        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #000; padding-bottom:6px; margin-bottom:8px; font-weight:bold; font-size:0.9rem;">
-                            <span>👤 ${ord.cliente || 'Cliente'}</span>
-                            <span style="color:#0026ff;">${ord.horaStr || ''}</span>
-                        </div>
-                        <div style="margin-bottom:6px;">
-                            <div><b>Modo:</b> <span style="background:#000; color:#fff; padding:1px 6px; border-radius:3px; font-size:0.75rem;">${ord.tipoEntrega || 'DESCONOCIDO'}</span></div>
-                            ${ord.direccion ? `<div style="margin-top:4px;"><b>Dirección:</b> ${ord.direccion}</div>` : ''}
-                            ${gpsLinkHtml}
-                        </div>
-                        <div style="border-top:1px dashed #ccc; border-bottom:1px dashed #ccc; padding:8px 0; margin:8px 0;">
-                            ${itemsHtml}
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95rem; margin-top:6px;">
-                            <span>TOTAL:</span>
-                            <span>₡${(ord.montoTotal || 0).toLocaleString()}</span>
-                        </div>
-                        <div style="font-size:0.78rem; margin-top:4px; color:#333;"><b>Pago:</b> ${ord.metodoPago || ''}</div>
-                        ${cashDetails}
-                    </div>
-                `;
+            let list = [];
+            snapshot.forEach(doc => {
+                let data = doc.data();
+                data.docId = doc.id;
+                list.push(data);
             });
 
-            container.innerHTML = html;
+            list.sort((a, b) => (b.timestampRaw || 0) - (a.timestampRaw || 0));
+            window.rawOrdersList = list;
+
+            poblarSelectorFechasOrders(list);
+            filterAdminOrdersBySelectedDate();
+
         }).catch(err => {
             container.innerHTML = `<p style="color:#ea4335; text-align:center;">Error al cargar tiquetes.</p>`;
+        });
+    }
+
+    function poblarSelectorFechasOrders(orders) {
+        let select = document.getElementById('admin-orders-date-select');
+        if (!select) return;
+
+        let dateMap = {};
+        orders.forEach(ord => {
+            if (ord.fechaStr) dateMap[ord.fechaStr] = true;
+        });
+
+        let availableDates = Object.keys(dateMap);
+        let optionsHtml = `<option value="ALL">🗓️ Ver Todos los Días (Historial Completo)</option>`;
+        
+        let todayStr = new Date().toLocaleDateString('es-CR', { timeZone: "America/Costa_Rica", year: 'numeric', month: '2-digit', day: '2-digit' });
+
+        availableDates.forEach(fStr => {
+            let label = (fStr === todayStr) ? `HOY (${fStr})` : fStr;
+            optionsHtml += `<option value="${fStr}">${label}</option>`;
+        });
+
+        select.innerHTML = optionsHtml;
+        select.value = todayStr; // Seleccionar HOY por defecto si existe
+        if (!dateMap[todayStr] && availableDates.length > 0) {
+            select.value = availableDates[0];
+        }
+    }
+
+    function filterAdminOrdersBySelectedDate() {
+        let select = document.getElementById('admin-orders-date-select');
+        let selectedDate = select ? select.value : 'ALL';
+
+        let filteredList = window.rawOrdersList;
+        if (selectedDate !== 'ALL') {
+            filteredList = window.rawOrdersList.filter(o => o.fechaStr === selectedDate);
+        }
+
+        renderAdminOrdersCards(filteredList);
+        actualizarContadoresPedidos(filteredList);
+    }
+
+    function actualizarContadoresPedidos(ordersList) {
+        let countEl = document.getElementById('stat-orders-count');
+        let moneyEl = document.getElementById('stat-orders-money');
+        
+        let count = ordersList.length;
+        let sumMoney = ordersList.reduce((acc, curr) => acc + (parseFloat(curr.montoTotal) || 0), 0);
+
+        if (countEl) countEl.innerText = count.toLocaleString('en-US');
+        if (moneyEl) moneyEl.innerText = "₡" + sumMoney.toLocaleString('en-US');
+    }
+
+    function renderAdminOrdersCards(ordersList) {
+        let container = document.getElementById('admin-orders-list-container');
+        if (!container) return;
+
+        if (ordersList.length === 0) {
+            container.innerHTML = `<p style="color:#888; font-style:italic; font-size:0.8rem; text-align:center; padding:15px;">No hay pedidos registrados para la fecha seleccionada.</p>`;
+            return;
+        }
+
+        let html = "";
+        let currentDayHeader = "";
+
+        ordersList.forEach(ord => {
+            if (ord.fechaStr !== currentDayHeader) {
+                currentDayHeader = ord.fechaStr;
+                html += `<div style="background:#0026ff; color:white; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:4px; margin:15px 0 10px 0; letter-spacing:1px; text-transform:uppercase;"><i class="fas fa-calendar-day"></i> Pedidos del Día: ${currentDayHeader}</div>`;
+            }
+
+            // ENLACE GPS EXACTO SIN NOMBRE DE NEGOCIOS
+            let gpsLinkHtml = "";
+            if (ord.gps) {
+                gpsLinkHtml = `<div style="margin-top:4px;"><i class="fas fa-map-marker-alt" style="color:#0026ff;"></i> <b>Ubicación GPS Exacta:</b> <a href="https://www.google.com/maps?q=loc:${ord.gps}" target="_blank" style="color:#0026ff; font-weight:bold; text-decoration:underline;">Ver Coordenadas en Google Maps</a></div>`;
+            }
+
+            let itemsHtml = "";
+            if (ord.items && Array.isArray(ord.items)) {
+                ord.items.forEach(it => {
+                    itemsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>${it.qty}x ${it.name}</span><span>₡${(it.qty * it.price).toLocaleString()}</span></div>`;
+                    if (it.notes) {
+                        itemsHtml += `<div style="color:#555; font-style:italic; font-size:0.75rem; margin-bottom:4px;">"${it.notes}"</div>`;
+                    }
+                });
+            }
+
+            let cashDetails = "";
+            if (ord.metodoPago && ord.metodoPago.includes('EFECTIVO')) {
+                if (ord.vuelto > 0) {
+                    cashDetails = `<div style="font-size:0.78rem; color:#444; margin-top:2px;">Paga con: ₡${(ord.pagaCon || 0).toLocaleString()} | Vuelto: ₡${(ord.vuelto || 0).toLocaleString()}</div>`;
+                } else {
+                    cashDetails = `<div style="font-size:0.78rem; color:#444; margin-top:2px;">Paga con Monto Exacto</div>`;
+                }
+            }
+
+            html += `
+                <div class="admin-ticket-card">
+                    <button class="gallery-item-trash" onclick="eliminarFacturaPedido('${ord.docId}')" title="Eliminar Factura Permanentemente" style="width:28px; height:28px; font-size:0.85rem; top:10px; right:10px; background:#ea4335;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #000; padding-bottom:6px; margin-bottom:8px; font-weight:bold; font-size:0.9rem; padding-right:32px;">
+                        <span>👤 ${ord.cliente || 'Cliente'}</span>
+                        <span style="color:#0026ff;">${ord.horaStr || ''}</span>
+                    </div>
+                    <div style="margin-bottom:6px;">
+                        <div><b>Modo:</b> <span style="background:#000; color:#fff; padding:1px 6px; border-radius:3px; font-size:0.75rem;">${ord.tipoEntrega || 'DESCONOCIDO'}</span></div>
+                        ${ord.direccion ? `<div style="margin-top:4px;"><b>Dirección:</b> ${ord.direccion}</div>` : ''}
+                        ${gpsLinkHtml}
+                    </div>
+                    <div style="border-top:1px dashed #ccc; border-bottom:1px dashed #ccc; padding:8px 0; margin:8px 0;">
+                        ${itemsHtml}
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95rem; margin-top:6px;">
+                        <span>TOTAL:</span>
+                        <span>₡${(ord.montoTotal || 0).toLocaleString()}</span>
+                    </div>
+                    <div style="font-size:0.78rem; margin-top:4px; color:#333;"><b>Pago:</b> ${ord.metodoPago || ''}</div>
+                    ${cashDetails}
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function eliminarFacturaPedido(docId) {
+        customConfirm("¿Seguro que deseas eliminar esta factura de la tiquetera? Esta acción no se puede deshacer.", function() {
+            db.collection("pedidos").doc(docId).delete().then(() => {
+                customAlert("Factura eliminada de la nube con éxito.", "Eliminación Exitosa");
+                cargarHistorialPedidosAdmin();
+            }).catch(err => {
+                customAlert("Error al eliminar la factura.", "Error");
+            });
         });
     }
 
@@ -1905,12 +2012,11 @@
             msg += (changeNeeded > 0) ? `%0A*Paga con:* ₡${cashPaidAmount.toLocaleString()}%0A*Llevar vuelto:* ₡${changeNeeded.toLocaleString()}` : `%0A*Paga con:* Monto Exacto`;
         }
         if (deliveryMode === "ENVÍO EXPRESS") {
-            if (gpsCoords !== "") msg += `%0A📍 *Ruta de Entrega:* https://maps.google.com/?q=${gpsCoords}`;
+            if (gpsCoords !== "") msg += `%0A📍 *Ruta Exacta GPS:* https://www.google.com/maps?q=loc:${gpsCoords}`;
             if (manualDir !== "") msg += `%0A🏠 *Señas/Dirección:* ${manualDir}`;
             msg += `%0A%0A⚠️ _Favor coordinar costo de envío por este medio._`;
         }
 
-        // REGISTRO AUTOMÁTICO DE FIRESTORE (TIQUETERA EN LA NUBE)
         try {
             let nowObj = new Date();
             let optionsDate = { timeZone: "America/Costa_Rica", year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -1934,8 +2040,8 @@
                 timestampRaw: Date.now()
             };
 
-            db.collection("pedidos").add(orderDataToSave).catch(err => console.error("Error al guardar pedido en BD:", err));
-        } catch (e) { console.error("Error registrando tiquete:", e); }
+            db.collection("pedidos").add(orderDataToSave).catch(err => console.error("Error guardando pedido:", err));
+        } catch (e) { console.error("Error guardando pedido:", e); }
         
         closeModals(); 
         let waUrl = `https://wa.me/506${currentGlobalWhatsApp}?text=${msg}`; 
