@@ -11,42 +11,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
-        /* PROTECCIÓN ADICIONAL CSS */
         img, video { 
-            -webkit-user-drag: none; 
-            -khtml-user-drag: none; 
-            -moz-user-drag: none; 
-            -o-user-drag: none; 
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
+            -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
         }
 
-        /* CONFIGURACIÓN CRÍTICA DE BLOQUEO DE FONDO INMÓVIL */
-        body.modal-lock {
-            overflow: hidden !important;
-            height: 100vh !important;
-            touch-action: none;
-        }
+        body.modal-lock { overflow: hidden !important; height: 100vh !important; touch-action: none; }
 
         body { 
-            background-color: #0b0b0b; 
-            color: #ffffff; 
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
-            margin: 0; 
-            padding-bottom: 240px;
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            transition: background 0.5s ease;
+            background-color: #0b0b0b; color: #ffffff; font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+            margin: 0; padding-bottom: 240px; background-size: cover; background-position: center;
+            background-attachment: fixed; background-repeat: no-repeat; transition: background 0.5s ease;
         }
         .container { max-width: 500px; margin: 0 auto; padding: 20px; text-align: center; position: relative; }
-        
         header { padding: 40px 0 30px; }
         .header-title { letter-spacing: 2px; font-size: 2.2rem; margin: 0; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-        /* INDICADOR DE HORARIO PREMIUM DINÁMICO */
         .badge-horario { position: absolute; top: 20px; left: 20px; background: rgba(17,17,17,0.85); border: 1px solid #333; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; }
         .badge-horario:hover { background: rgba(30,30,30,0.95); transform: scale(1.03); }
         .dot-status { width: 8px; height: 8px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
@@ -68,7 +47,6 @@
         .item-title { font-weight: bold; font-size: 0.95rem; color: #fff; word-break: break-word; }
         .item-price { color: #0026ff; font-weight: bold; font-size: 0.85rem; }
         
-        /* FIJACIÓN ESTRUCTURAL DE CAJA DE CONTROLES */
         .item-controls { display: flex; align-items: center; gap: 5px; flex-shrink: 0; user-select: none; }
         .btn-qty { background: #333; border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
         .qty-input { width: 45px; height: 28px; background: transparent; border: 1px solid #444; color: white; text-align: center; border-radius: 4px; font-weight: bold; font-size: 1rem; flex-shrink: 0; }
@@ -77,7 +55,6 @@
         .item-note::placeholder { color: #666; }
         .item-note:focus { border-color: #0026ff; }
 
-        /* EFECTO EMULADOR DE CINTA LED DINÁMICA DE NEÓN MULTICOLOR PARA CONTENEDORES */
         @keyframes ledStripPulse {
             0% { border-color: #0026ff; box-shadow: 0 0 12px #0026ff, inset 0 0 4px #0026ff; }
             25% { border-color: #00ffcc; box-shadow: 0 0 16px #00ffcc, inset 0 0 4px #00ffcc; }
@@ -87,79 +64,22 @@
         }
 
         .promo-led-container {
-            background: rgba(11, 11, 11, 0.95); 
-            border: 2px solid #0026ff; 
-            padding: 16px; 
-            margin: 0 auto 25px auto; 
-            border-radius: 14px; 
-            text-align: left; 
-            box-sizing: border-box;
-            animation: ledStripPulse 4s linear infinite;
+            background: rgba(11, 11, 11, 0.95); border: 2px solid #0026ff; padding: 16px; margin: 0 auto 25px auto; 
+            border-radius: 14px; text-align: left; box-sizing: border-box; animation: ledStripPulse 4s linear infinite;
         }
 
-        /* BANNER LED ADAPTABLE Y ELÁSTICO SIN CORTES */
         .text-banner-container {
-            background: rgba(11, 11, 11, 0.95);
-            border: 2px solid #0026ff;
-            padding: 16px;
-            margin: 0 auto 20px auto;
-            border-radius: 14px;
-            box-sizing: border-box;
-            animation: ledStripPulse 4s linear infinite;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            height: auto !important;
-            width: 100%;
-            overflow: hidden;
+            background: rgba(11, 11, 11, 0.95); border: 2px solid #0026ff; padding: 16px; margin: 0 auto 20px auto;
+            border-radius: 14px; box-sizing: border-box; animation: ledStripPulse 4s linear infinite;
+            display: flex; flex-direction: column; gap: 14px; height: auto !important; width: 100%; overflow: hidden;
         }
 
-        /* ARQUITECTURA DE MOTOR GRÁFICO AVANZADO v13.6.1 (CAPAS EXTERIORES DE CINTA LED) */
-        .text-banner-content {
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            word-wrap: break-word;
-            display: block;
-        }
+        .text-banner-content { width: 100%; text-align: center; font-weight: bold; word-wrap: break-word; display: block; }
+        .char-master-wrapper { position: relative; display: inline-block; vertical-align: middle; white-space: nowrap; }
 
-        .char-master-wrapper {
-            position: relative;
-            display: inline-block;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-        /* CAPA 1: CINTA LED VECTORIAL AL FONDO (NO ATRAVIESA LA LETRA) */
-        .char-layer-led {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: transparent !important;
-            pointer-events: none;
-            z-index: 1;
-            white-space: nowrap;
-        }
-
-        /* CAPA 2: BORDE / TRAZO (CAPA INTERMEDIA) */
-        .char-layer-stroke {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: transparent !important;
-            pointer-events: none;
-            z-index: 5;
-            white-space: nowrap;
-        }
-
-        /* CAPA 3: RELLENO SÓLIDO LIMPIO DE LA LETRA (AL FRENTE) */
-        .char-layer-fill {
-            position: relative;
-            display: inline-block;
-            pointer-events: none;
-            z-index: 10;
-            white-space: nowrap;
-        }
+        .char-layer-led { position: absolute; top: 0; left: 0; color: transparent !important; pointer-events: none; z-index: 1; white-space: nowrap; }
+        .char-layer-stroke { position: absolute; top: 0; left: 0; color: transparent !important; pointer-events: none; z-index: 5; white-space: nowrap; }
+        .char-layer-fill { position: relative; display: inline-block; pointer-events: none; z-index: 10; white-space: nowrap; }
 
         @keyframes ledSolidLineAnim {
             0%, 100% { -webkit-text-stroke-color: #0026ff; }
@@ -167,52 +87,13 @@
             50% { -webkit-text-stroke-color: #ff00ff; }
             75% { -webkit-text-stroke-color: #3300ff; }
         }
+        .led-stroke-mov { animation: ledSolidLineAnim 4s linear infinite !important; }
 
-        .led-stroke-mov {
-            animation: ledSolidLineAnim 4s linear infinite !important;
-        }
+        .text-banner-media-wrapper { width: 100%; height: auto; border-radius: 10px; overflow: hidden; display: block; background: rgba(0,0,0,0.2); }
+        .text-banner-media-wrapper img, .text-banner-media-wrapper video { width: 100%; height: auto; max-height: 280px; object-fit: contain; display: block; }
 
-        .text-banner-media-wrapper {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            overflow: hidden;
-            display: block;
-            background: rgba(0,0,0,0.2);
-        }
-        .text-banner-media-wrapper img, .text-banner-media-wrapper video {
-            width: 100%;
-            height: auto;
-            max-height: 280px;
-            object-fit: contain;
-            display: block;
-        }
-
-        .admin-slider {
-            width: 100%;
-            -webkit-appearance: none;
-            background: #333;
-            height: 6px;
-            border-radius: 3px;
-            outline: none;
-            margin: 10px 0;
-        }
-        .admin-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #0026ff;
-            cursor: pointer;
-            box-shadow: 0 0 6px #0026ff;
-            transition: 0.2s;
-        }
-        .admin-slider::-webkit-slider-thumb:active {
-            transform: scale(1.2);
-            background: #00ffcc;
-            box-shadow: 0 0 10px #00ffcc;
-        }
+        .admin-slider { width: 100%; -webkit-appearance: none; background: #333; height: 6px; border-radius: 3px; outline: none; margin: 10px 0; }
+        .admin-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #0026ff; cursor: pointer; box-shadow: 0 0 6px #0026ff; transition: 0.2s; }
 
         .cart-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; border-top: 2px solid #0026ff; z-index: 1000; text-align: center; }
         .total-container { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
@@ -227,6 +108,13 @@
         .ticket-style { font-family: 'Courier New', Courier, monospace; background: white; color: black; padding: 25px; border-radius: 5px; width: 85%; max-width: 350px; text-align: center; }
         .ticket-header { border-bottom: 1px dashed #000; margin-bottom: 15px; padding-bottom: 15px; }
 
+        /* ESTILO PARA TIQUETES DE HISTORIAL DE ADMINISTRACIÓN */
+        .admin-ticket-card {
+            background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace;
+            padding: 16px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #0026ff; text-align: left;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 0.82rem; line-height: 1.4;
+        }
+
         #zoomModal { background-color: rgba(0, 0, 0, 0.95); cursor: zoom-out; }
         #zoomModal img, #zoomModal video { max-width: 95%; max-height: 85%; border-radius: 10px; }
 
@@ -235,7 +123,6 @@
         
         .btn-loc { background: #333; border: 1px solid #444; } 
         .btn-pickup { background: #333; border: 1px solid #444; }
-        
         .btn-loc.active { background: #0026ff; border: none; color: white; } 
         .btn-pickup.active { background: #ff9900; border: none; color: white; }
 
@@ -248,54 +135,26 @@
         .social-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px; width: 100%; }
         .social-row-btn { display: none; align-items: center; gap: 12px; text-decoration: none; color: white; font-size: 0.95rem; font-weight: 600; background: rgba(255,255,255,0.04); padding: 10px 16px; border-radius: 30px; border: 1px solid #222; width: 85%; max-width: 280px; box-sizing: border-box; transition: 0.3s; }
         .social-row-btn i { font-size: 1.3rem; }
-        .social-row-btn:hover { background: rgba(255,255,255,0.08); border-color: #0026ff; }
-        
+
         .version-tag { color: #555; font-weight: bold; margin: 40px auto 10px; font-size: 0.8rem; text-align: center; letter-spacing: 1px; }
         
         #adminModal .modal-box { max-width: 440px; text-align: left; background: #141414; color: white; border: 2px solid #0026ff; max-height: 80vh; overflow-y: auto; padding: 20px; }
         .admin-section-title { font-size: 1rem; color: #0026ff; border-bottom: 1px solid #333; padding-bottom: 5px; margin: 15px 0 10px 0; font-weight: bold; }
         .admin-field { margin-bottom: 12px; }
         .admin-field label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px; font-weight: bold; }
-        
         .admin-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; outline: none; font-size: 0.9rem; margin-bottom: 4px; }
-        .admin-input:focus { border-color: #0026ff; }
 
         select.admin-input, select.schedule-select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-color: #222;
-            color: white;
-            border: 1px solid #444;
-            padding: 10px 35px 10px 12px !important;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            outline: none;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: #222; color: white; border: 1px solid #444; padding: 10px 35px 10px 12px !important; border-radius: 6px; font-size: 0.9rem; outline: none; cursor: pointer;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230026ff'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 18px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        select.schedule-select {
-            padding: 6px 25px 6px 8px !important;
-            background-position: right 6px center;
-            background-size: 14px;
-            font-size: 0.8rem;
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 18px;
         }
         
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 24px;
-        }
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border: 1px solid #444; }
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; }
-        input:checked + .slider { background-color: #0026ff; border-color: #0026ff; box-shadow: 0 0 8px rgba(0, 38, 255, 0.5); }
+        input:checked + .slider { background-color: #0026ff; border-color: #0026ff; }
         input:checked + .slider:before { transform: translateX(22px); }
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
@@ -307,35 +166,13 @@
         .admin-cat-block { background: #1c1c1c; border: 1px solid #333; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
         .admin-prod-card { background: #262626; border: 1px solid #444; border-radius: 6px; padding: 10px; margin-top: 8px; position: relative; }
         .btn-admin-delete { background: #ea4335; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; height: 38px; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-admin-delete:hover { background: #ff5c4d; }
         
-        .btn-admin-toggle-cat { background: transparent; border: none; color: #0026ff; font-size: 1.1rem; cursor: pointer; padding: 0 8px; height: 38px; display: inline-flex; align-items: center; justify-content: center; }
-        .admin-actions { display: flex; gap: 10px; margin-top: 25px; position: sticky; bottom: 0; background: #141414; padding-top: 10px; }
-
-        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; max-height: 260px; overflow-y: auto; padding-right: 4px; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; max-height: 260px; overflow-y: auto; }
         .gallery-item-box { position: relative; border-radius: 6px; overflow: hidden; border: 1px solid #444; cursor: pointer; background: #000; height: 75px; }
-        .gallery-item-box:hover { border-color: #0026ff; }
         .gallery-item-box img, .gallery-item-box video { width: 100%; height: 100%; object-fit: cover; }
         .gallery-item-trash { position: absolute; top: 2px; right: 2px; background: rgba(234,67,53,0.9); color: white; border: none; border-radius: 4px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; cursor: pointer; z-index: 5; }
 
-        .media-badge {
-            position: absolute;
-            bottom: 4px;
-            left: 4px;
-            background: rgba(11, 11, 11, 0.85);
-            color: #ffffff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.62rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            border: 1px solid #333;
-            pointer-events: none;
-            z-index: 4;
-            letter-spacing: 0.5px;
-        }
+        .media-badge { position: absolute; bottom: 4px; left: 4px; background: rgba(11, 11, 11, 0.85); color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 0.62rem; font-weight: bold; pointer-events: none; z-index: 4; }
     </style>
 </head>
 <body oncontextmenu="return false;"> 
@@ -346,11 +183,10 @@
     </div>
 
     <header>
-        <img id="main-profile-img" src="" style="display:none; max-width: 220px; max-height: 160px; object-fit: contain; margin: 0 auto 15px; border-radius: 0; border: none; box-shadow: none; background: transparent;">
+        <img id="main-profile-img" src="" style="display:none; max-width: 220px; max-height: 160px; object-fit: contain; margin: 0 auto 15px; border-radius: 0; border: none; background: transparent;">
         <h1 class="header-title" id="main-title">Conectando con Google...</h1>
     </header>
 
-    <!-- CONTENEDOR DE PUBLICIDAD COMPLETO -->
     <div id="banners-main-container"></div>
 
     <div class="nota-uso">
@@ -365,9 +201,7 @@
     <div class="business-info-section">
         <p id="display-description" class="business-desc"></p>
         <div id="display-maps-container" class="maps-btn-container">
-            <a id="display-maps-link" href="#" target="_blank" class="btn-maps-link">
-                <i class="fas fa-map-marked-alt"></i> Ver Ubicación en Google Maps
-            </a>
+            <a id="display-maps-link" href="#" target="_blank" class="btn-maps-link"><i class="fas fa-map-marked-alt"></i> Ver Ubicación en Google Maps</a>
             <p id="display-señas-local" class="señas-text"></p>
         </div>
         
@@ -378,23 +212,30 @@
         </div>
     </div>
 
-    <p class="version-tag">Versión 13.6.1</p>
+    <p class="version-tag">Versión 13.7.0 (Historial & Analytics)</p>
 
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span></div>
         <div class="footer-btns">
             <button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button>
         </div>
-        <button class="btn-send" onclick="openPayModal()">
-            <i class="fab fa-whatsapp"></i> ENVIAR PEDIDO
-        </button>
+        <button class="btn-send" onclick="openPayModal()"><i class="fab fa-whatsapp"></i> ENVIAR PEDIDO</button>
         <div onclick="processAdminClick()" style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; cursor: pointer; background: transparent; z-index: 9999;"></div>
     </div>
 </div>
 
 <div id="zoomModal" class="modal-overlay" onclick="closeZoomModal()"></div>
 
-<!-- MODAL GALERÍA CLOUD -->
+<!-- MODAL DESGLOSE DE VISITAS DIARIAS (RELOJ) -->
+<div id="visitasModal" class="modal-overlay" onclick="closeModalTop()">
+    <div class="modal-box" onclick="event.stopPropagation()" style="background: #141414; color: white; border: 2px solid #00ffcc; max-width: 380px; max-height: 80vh; overflow-y: auto; text-align: left;">
+        <h3 style="margin-top:0; color:#00ffcc; text-align:center;"><i class="fas fa-history"></i> Historial de Visitas por Día</h3>
+        <p style="font-size:0.8rem; color:#aaa; margin-bottom:15px; text-align:center;">Registro día a día de tráfico y dispositivos únicos.</p>
+        <div id="visitas-diarias-grid" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <button style="margin-top:20px; width:100%; padding:12px; background:#222; color:white; border:1px solid #444; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeModalTop()">Cerrar</button>
+    </div>
+</div>
+
 <div id="galleryModal" class="modal-overlay" onclick="closeModalTop()">
     <div class="modal-box" onclick="event.stopPropagation()" style="background: #141414; color: white; border: 2px solid #0026ff; max-width: 380px;">
         <h3 style="margin-top:0; color:#0026ff; text-align:center;"><i class="fas fa-cloud"></i> Biblioteca de la Nube</h3>
@@ -404,12 +245,9 @@
     </div>
 </div>
 
-<!-- DIÁLOGO DE CONFIRMACIÓN ELEGANTE PREMIUM -->
 <div id="customConfirmModal" class="modal-overlay" style="z-index: 9999;">
     <div class="modal-box" onclick="event.stopPropagation()" style="background: #141414; color: white; border: 2px solid #ea4335; max-width: 320px; text-align: center; padding: 25px; border-radius: 12px;">
-        <h3 id="confirmTitle" style="margin-top:0; color: #ea4335; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <i class="fas fa-exclamation-triangle"></i> ¿Eliminar Archivo?
-        </h3>
+        <h3 id="confirmTitle" style="margin-top:0; color: #ea4335; font-size: 1.2rem;"><i class="fas fa-exclamation-triangle"></i> ¿Eliminar Archivo?</h3>
         <p id="confirmMessage" style="font-size: 0.95rem; color: #ccc; margin: 15px 0 20px 0; line-height: 1.4; text-align: center;"></p>
         <div style="display:flex; gap:10px; margin-top:20px;">
             <button id="btn-confirm-yes" class="btn-admin-delete" style="flex:1; height:40px; font-weight:bold;">Sí, Eliminar</button>
@@ -420,7 +258,7 @@
 
 <div id="ticketModal" class="modal-overlay" onclick="closeModalTop()">
     <div class="ticket-style" onclick="event.stopPropagation()">
-        <img id="ticket-logo" src="" style="display:none; max-width: 120px; max-height: 80px; object-fit: contain; margin: 0 auto 12px; border-radius:0; border:none;">
+        <img id="ticket-logo" src="" style="display:none; max-width: 120px; max-height: 80px; object-fit: contain; margin: 0 auto 12px;">
         <div class="ticket-header"><h3 id="ticket-title" style="margin: 0; font-family: sans-serif;">Cargando...</h3></div>
         <div id="ticket-list" style="text-align: left; font-size: 0.85rem; color: black;"></div>
         <div style="border-top:1px dashed #000; margin-top:15px; padding-top:10px; font-weight:bold; display:flex; justify-content:space-between; font-size:1.1rem; color: black;">
@@ -461,9 +299,7 @@
         <div style="margin: 15px 0; font-size: 0.8rem; color: #888; font-weight: bold; letter-spacing: 1px;">O REQUIERE VUELTO CON:</div>
         
         <input type="number" id="input-cash-amount" class="name-input" placeholder="Ej: 5000 o 10000" inputmode="numeric" style="color: black; background: #f5f5f5; border: 1px solid #ccc; text-align:center; font-size: 1.2rem; font-weight: bold;">
-        <button class="btn-send" style="width:100%; margin-top:15px;" onclick="processCustomCashPayment()">
-            <i class="fas fa-calculator"></i> CALCULAR VUELTO Y PROSEGUIR
-        </button>
+        <button class="btn-send" style="width:100%; margin-top:15px;" onclick="processCustomCashPayment()"><i class="fas fa-calculator"></i> CALCULAR VUELTO Y PROSEGUIR</button>
     </div>
 </div>
 
@@ -474,12 +310,8 @@
         
         <p style="font-size: 0.85rem; color: #444; margin-bottom: 5px; font-weight: bold;">¿Cómo recibirás tu pedido?</p>
         <div class="delivery-btns" style="margin-bottom: 15px; display: flex; gap: 10px;">
-            <button class="btn-loc" id="btn-location" onclick="setExpress()">
-                <i class="fas fa-motorcycle"></i> EXPRESS
-            </button>
-            <button class="btn-pickup" id="btn-pickup" onclick="setPickup()">
-                <i class="fas fa-store"></i> RECOGER
-            </button>
+            <button class="btn-loc" id="btn-location" onclick="setExpress()"><i class="fas fa-motorcycle"></i> EXPRESS</button>
+            <button class="btn-pickup" id="btn-pickup" onclick="setPickup()"><i class="fas fa-store"></i> RECOGER</button>
         </div>
         
         <label style="font-size: 0.85rem; color: #444; font-weight: bold;">Tu nombre por favor:</label>
@@ -490,9 +322,7 @@
             <input type="text" id="delivery-address" class="name-input" placeholder="Ej: Frente a Goyo, casa de portón verde..." style="margin-top:5px; color: black; background: #f5f5f5; border: 1px solid #ccc;">
         </div>
         
-        <button class="btn-send" style="width:100%; margin-top:15px;" onclick="validateAndSendOrder()">
-            <i class="fab fa-whatsapp"></i> ENVIAR PEDIDO POR WHATSAPP
-        </button>
+        <button class="btn-send" style="width:100%; margin-top:15px;" onclick="validateAndSendOrder()"><i class="fab fa-whatsapp"></i> ENVIAR PEDIDO POR WHATSAPP</button>
     </div>
 </div>
 
@@ -510,9 +340,7 @@
 
 <div id="customAlertModal" class="modal-overlay" onclick="closeCustomAlert()" style="z-index: 9999;">
     <div class="modal-box" onclick="event.stopPropagation()" style="background: #141414; color: white; border: 2px solid #0026ff; max-width: 320px; text-align: center; padding: 25px; border-radius: 12px;">
-        <h3 id="customAlertTitle" style="margin-top:0; color: #0026ff; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <i class="fas fa-info-circle"></i> Aviso
-        </h3>
+        <h3 id="customAlertTitle" style="margin-top:0; color: #0026ff; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px;"><i class="fas fa-info-circle"></i> Aviso</h3>
         <p id="customAlertMessage" style="font-size: 0.95rem; color: #ccc; margin: 15px 0 20px 0; line-height: 1.4; text-align: center;"></p>
         <button class="btn-admin-save" onclick="closeCustomAlert()" style="width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Aceptar</button>
     </div>
@@ -520,9 +348,8 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v13.6.1)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v13.7.0)</h3>
         
-        <!-- PANEL DE ANALÍTICA DE VISITAS -->
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
             <div style="display: flex; justify-content: space-around; margin-bottom: 10px;">
@@ -536,44 +363,46 @@
                     <div id="stat-views-today" style="font-size: 1.4rem; font-weight: bold; color: #25D366;">0</div>
                 </div>
             </div>
-            <div style="border-top: 1px dashed #333; padding-top: 8px; display: flex; justify-content: space-around; font-size: 0.8rem; color: #bbb;">
+            <div style="border-top: 1px dashed #333; padding-top: 8px; display: flex; justify-content: space-around; font-size: 0.8rem; color: #bbb; margin-bottom: 10px;">
                 <div>Total Dispositivos: <b id="stat-devices-all" style="color: #00ffcc;">0</b></div>
                 <div>Total Visitas: <b id="stat-views-all" style="color: #25D366;">0</b></div>
             </div>
+            <!-- BOTÓN CON ICONO DE RELOJ PARA DESGLOSE DIARIO DE VISITAS -->
+            <button class="btn-ticket" style="width: 100%; background: #0b0b0b; border-color: #00ffcc; color: #00ffcc; font-weight: bold; padding: 8px;" onclick="openHistorialVisitasModal()">
+                <i class="fas fa-clock"></i> Ver Desglose Diario de Visitas (Reloj)
+            </button>
+        </div>
+
+        <!-- SECCIÓN TIQUETERA / HISTORIAL DE PEDIDOS -->
+        <div class="admin-section-title"><i class="fas fa-receipt"></i> Historial de Pedidos (Tiquetera)</div>
+        <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-orders-block', 'orders')" style="background:#222; color:white; border-color:#333; margin-bottom:15px;">
+            <i class="fas fa-receipt"></i> Ver Historial de Pedidos Guardados
+        </button>
+        
+        <div id="admin-orders-block" style="display:none; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
+            <div id="admin-orders-list-container">Cargando tiquetes guardados...</div>
         </div>
 
         <div class="admin-section-title"><i class="fas fa-images"></i> Campañas Especiales de Banners</div>
-        <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-banners-management-block', 'banners')" style="background:#222; color:white; border-color:#333; margin-bottom:10px;">
-            <i class="fas fa-image"></i> Gestionar Banners (Imágenes/Video)
-        </button>
+        <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-banners-management-block', 'banners')" style="background:#222; color:white; border-color:#333; margin-bottom:10px;"><i class="fas fa-image"></i> Gestionar Banners (Imágenes/Video)</button>
         
         <div id="admin-banners-management-block" style="display:none; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
-            <button class="btn-pickup" style="background:#0026ff; border:none; width:100%; margin-bottom:12px; padding:10px;" onclick="addAdminBannerItem()">
-                <i class="fas fa-plus"></i> Agregar Banner 🌄
-            </button>
+            <button class="btn-pickup" style="background:#0026ff; border:none; width:100%; margin-bottom:12px; padding:10px;" onclick="addAdminBannerItem()"><i class="fas fa-plus"></i> Agregar Banner 🌄</button>
             <div id="admin-banners-list-container"></div>
         </div>
 
-        <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-text-banners-management-block', 'text_banners')" style="background:#222; color:white; border-color:#333; margin-bottom:15px;">
-            <i class="fas fa-font"></i> Gestionar Banners de Texto LED
-        </button>
+        <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-text-banners-management-block', 'text_banners')" style="background:#222; color:white; border-color:#333; margin-bottom:15px;"><i class="fas fa-font"></i> Gestionar Banners de Texto LED</button>
         
         <div id="admin-text-banners-management-block" style="display:none; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
-            <button class="btn-pickup" style="background:#0026ff; border:none; width:100%; margin-bottom:12px; padding:10px;" onclick="addAdminTextBannerItem()">
-                <i class="fas fa-plus"></i> Agregar Banner de Texto
-            </button>
+            <button class="btn-pickup" style="background:#0026ff; border:none; width:100%; margin-bottom:12px; padding:10px;" onclick="addAdminTextBannerItem()"><i class="fas fa-plus"></i> Agregar Banner de Texto</button>
             <div id="admin-text-banners-list-container"></div>
         </div>
 
         <div class="admin-section-title"><i class="fas fa-utensils"></i> Menú del Establecimiento</div>
-        <button class="pay-option-btn" onclick="toggleAdminMenuSection()" style="background:#222; color:white; border-color:#333; margin-bottom:10px;">
-            <i class="fas fa-bars"></i> Gestionar Categorías y Productos
-        </button>
+        <button class="pay-option-btn" onclick="toggleAdminMenuSection()" style="background:#222; color:white; border-color:#333; margin-bottom:10px;"><i class="fas fa-bars"></i> Gestionar Categorías y Productos</button>
         
         <div id="admin-menu-management-block" style="display:none; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
-            <button class="btn-pickup" style="background:#0026ff; border:none; width:100%; margin-bottom:12px; padding:10px;" onclick="addAdminCategory()">
-                <i class="fas fa-plus"></i> Agregar Categoría
-            </button>
+            <button class="btn-pickup" style="background:#0026ff; border:none; width:100%; margin-bottom:12px; padding:10px;" onclick="addAdminCategory()"><i class="fas fa-plus"></i> Agregar Categoría</button>
             <div id="admin-categories-list"></div>
         </div>
 
@@ -678,12 +507,6 @@
     let galleryTarget = { type: '', catIdx: null, prodIdx: null, bannerIdx: null };
 
     let modalStack = [];
-    let programmaticBackCount = 0;
-
-    /* DETECTOR DE ENTORNO SEGURO PARA CODEPEN E IFRAMES */
-    function isTopWindow() {
-        try { return window.self === window.top; } catch (e) { return false; }
-    }
 
     function checkModalLock() {
         if (modalStack.length > 0) { document.body.classList.add('modal-lock'); } 
@@ -693,18 +516,12 @@
     function openModal(id) {
         if (modalStack.length > 0) {
             let topId = modalStack[modalStack.length - 1];
-            if (topId === id) {
-                document.getElementById(id).style.display = "flex";
-                return;
-            }
+            if (topId === id) { document.getElementById(id).style.display = "flex"; return; }
             document.getElementById(topId).style.display = "none";
         }
         modalStack.push(id);
         document.getElementById(id).style.display = "flex";
         checkModalLock();
-        if (isTopWindow()) {
-            try { history.pushState({ depth: modalStack.length }, ""); } catch(e){}
-        }
     }
 
     function closeModalTop() {
@@ -716,10 +533,6 @@
                 document.getElementById(prevId).style.display = "flex";
             }
             checkModalLock();
-            if (isTopWindow()) {
-                programmaticBackCount++;
-                try { history.back(); } catch(e){}
-            }
         }
     }
 
@@ -732,25 +545,8 @@
             });
             modalStack = [];
             checkModalLock();
-            if (isTopWindow()) {
-                programmaticBackCount += count;
-                try { history.go(-count); } catch(e){}
-            }
         }
     }
-
-    window.addEventListener('popstate', function(event) {
-        if (programmaticBackCount > 0) { programmaticBackCount--; return; }
-        if (modalStack.length > 0) {
-            let closedId = modalStack.pop();
-            document.getElementById(closedId).style.display = "none";
-            if (modalStack.length > 0) {
-                let prevId = modalStack[modalStack.length - 1];
-                document.getElementById(prevId).style.display = "flex";
-            }
-            checkModalLock();
-        }
-    });
 
     function triggerFileInput(id) {
         let el = document.getElementById(id);
@@ -819,7 +615,6 @@
         return Math.round(minPx + ((val - 1) * (maxPx - minPx) / 99));
     }
 
-    /* OBTENCIÓN PROTEGIDA DE IDENTIFICADOR DE DISPOSITIVO PARA IFRAMES Y CODEPEN */
     function getDeviceId() {
         let deviceId = null;
         try {
@@ -876,6 +671,143 @@
                 let elAD = document.getElementById('stat-devices-all'); if(elAD) elAD.innerText = uniqueAllDevs.toLocaleString();
             }
         }).catch(err => console.error(err));
+    }
+
+    /* MOTOR DE BÚSQUEDA Y RENDERS DEL DESGLOSE DE VISITAS DIARIAS (RELOJ) */
+    function openHistorialVisitasModal() {
+        let grid = document.getElementById('visitas-diarias-grid');
+        grid.innerHTML = `<p style="color:#aaa; font-style:italic; text-align:center;">Cargando historial de días...</p>`;
+        openModal('visitasModal');
+
+        db.collection("visitas_diarias").get().then(snapshot => {
+            if (snapshot.empty) {
+                grid.innerHTML = `<p style="color:#aaa; font-style:italic; text-align:center;">No hay registros de visitas archivados aún.</p>`;
+                return;
+            }
+
+            let docsArray = [];
+            snapshot.forEach(doc => { docsArray.push(doc.data()); });
+            
+            // Ordenar por fecha descendente
+            docsArray.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+
+            let html = "";
+            let diasSemanaNombres = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+            docsArray.forEach(item => {
+                let fechaParts = (item.fecha || "").split("-");
+                let fechaFormateada = item.fecha;
+                let nombreDia = "";
+
+                if (fechaParts.length === 3) {
+                    let y = parseInt(fechaParts[0]), m = parseInt(fechaParts[1]) - 1, d = parseInt(fechaParts[2]);
+                    let dateObj = new Date(y, m, d);
+                    nombreDia = diasSemanaNombres[dateObj.getDay()];
+                    fechaFormateada = `${d.toString().padStart(2, '0')}/${(m + 1).toString().padStart(2, '0')}/${y}`;
+                }
+
+                let totalViews = item.visitas_totales || 0;
+                let uniqueDevs = (item.dispositivos && Array.isArray(item.dispositivos)) ? item.dispositivos.length : 0;
+
+                html += `
+                    <div style="background: rgba(255,255,255,0.04); border: 1px solid #333; padding: 10px 14px; border-radius: 8px; border-left: 4px solid #00ffcc;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                            <span style="font-weight:bold; color:#fff; font-size: 0.95rem;">${nombreDia} ${fechaFormateada}</span>
+                            <span style="font-size:0.75rem; color:#888;">${item.fecha}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size: 0.82rem; color:#bbb; margin-top: 6px;">
+                            <span>📱 Dispositivos: <b style="color:#00ffcc;">${uniqueDevs.toLocaleString()}</b></span>
+                            <span>👁️ Visitas Totales: <b style="color:#25D366;">${totalViews.toLocaleString()}</b></span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }).catch(err => {
+            grid.innerHTML = `<p style="color:#ea4335; text-align:center;">Error al consultar visitas.</p>`;
+        });
+    }
+
+    /* CARGAR Y MOSTRAR HISTORIAL DE PEDIDOS EN PANEL ADMIN */
+    function cargarHistorialPedidosAdmin() {
+        let container = document.getElementById('admin-orders-list-container');
+        if (!container) return;
+        container.innerHTML = `<p style="color:#aaa; font-style:italic; text-align:center;">Buscando tiquetes guardados...</p>`;
+
+        db.collection("pedidos").get().then(snapshot => {
+            if (snapshot.empty) {
+                container.innerHTML = `<p style="color:#888; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">No hay pedidos registrados en la tiquetera.</p>`;
+                return;
+            }
+
+            let ordersList = [];
+            snapshot.forEach(doc => { ordersList.push(doc.data()); });
+
+            // Ordenar pedidos por timestamp más reciente primero
+            ordersList.sort((a, b) => (b.timestampRaw || 0) - (a.timestampRaw || 0));
+
+            let html = "";
+            let currentDayHeader = "";
+
+            ordersList.forEach(ord => {
+                if (ord.fechaStr !== currentDayHeader) {
+                    currentDayHeader = ord.fechaStr;
+                    html += `<div style="background:#0026ff; color:white; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:4px; margin:15px 0 10px 0; letter-spacing:1px; text-transform:uppercase;"><i class="fas fa-calendar-day"></i> Pedidos del Día: ${currentDayHeader}</div>`;
+                }
+
+                let gpsLinkHtml = "";
+                if (ord.gps) {
+                    gpsLinkHtml = `<div style="margin-top:4px;"><i class="fas fa-map-marker-alt" style="color:#0026ff;"></i> <b>Ruta GPS:</b> <a href="https://maps.google.com/?q=${ord.gps}" target="_blank" style="color:#0026ff; font-weight:bold; text-decoration:underline;">Ver en Google Maps</a></div>`;
+                }
+
+                let itemsHtml = "";
+                if (ord.items && Array.isArray(ord.items)) {
+                    ord.items.forEach(it => {
+                        itemsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>${it.qty}x ${it.name}</span><span>₡${(it.qty * it.price).toLocaleString()}</span></div>`;
+                        if (it.notes) {
+                            itemsHtml += `<div style="color:#555; font-style:italic; font-size:0.75rem; margin-bottom:4px;">"${it.notes}"</div>`;
+                        }
+                    });
+                }
+
+                let cashDetails = "";
+                if (ord.metodoPago && ord.metodoPago.includes('EFECTIVO')) {
+                    if (ord.vuelto > 0) {
+                        cashDetails = `<div style="font-size:0.78rem; color:#444; margin-top:2px;">Paga con: ₡${(ord.pagaCon || 0).toLocaleString()} | Vuelto: ₡${(ord.vuelto || 0).toLocaleString()}</div>`;
+                    } else {
+                        cashDetails = `<div style="font-size:0.78rem; color:#444; margin-top:2px;">Paga con Monto Exacto</div>`;
+                    }
+                }
+
+                html += `
+                    <div class="admin-ticket-card">
+                        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #000; padding-bottom:6px; margin-bottom:8px; font-weight:bold; font-size:0.9rem;">
+                            <span>👤 ${ord.cliente || 'Cliente'}</span>
+                            <span style="color:#0026ff;">${ord.horaStr || ''}</span>
+                        </div>
+                        <div style="margin-bottom:6px;">
+                            <div><b>Modo:</b> <span style="background:#000; color:#fff; padding:1px 6px; border-radius:3px; font-size:0.75rem;">${ord.tipoEntrega || 'DESCONOCIDO'}</span></div>
+                            ${ord.direccion ? `<div style="margin-top:4px;"><b>Dirección:</b> ${ord.direccion}</div>` : ''}
+                            ${gpsLinkHtml}
+                        </div>
+                        <div style="border-top:1px dashed #ccc; border-bottom:1px dashed #ccc; padding:8px 0; margin:8px 0;">
+                            ${itemsHtml}
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.95rem; margin-top:6px;">
+                            <span>TOTAL:</span>
+                            <span>₡${(ord.montoTotal || 0).toLocaleString()}</span>
+                        </div>
+                        <div style="font-size:0.78rem; margin-top:4px; color:#333;"><b>Pago:</b> ${ord.metodoPago || ''}</div>
+                        ${cashDetails}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }).catch(err => {
+            container.innerHTML = `<p style="color:#ea4335; text-align:center;">Error al cargar tiquetes.</p>`;
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -936,28 +868,6 @@
                     if (typeof item === 'string') return { url: item, public_id: "" };
                     return item;
                 });
-
-                let extractedUrls = [];
-                if (data.bg_url) extractedUrls.push(data.bg_url);
-                if (data.profile_url) extractedUrls.push(data.profile_url);
-                window.localBannersArray.forEach(b => { if(b.url) extractedUrls.push(b.url); });
-                window.localTextBannersArray.forEach(t => { if(t.url) extractedUrls.push(t.url); });
-                window.localMenuArray.forEach(cat => {
-                    (cat.products || []).forEach(p => { if(p.img) extractedUrls.push(p.img); });
-                });
-
-                let syncNeeded = false;
-                extractedUrls.forEach(url => {
-                    if(url && !window.globalGalleryArray.some(item => item && item.url === url)) {
-                        window.globalGalleryArray.unshift({ url: url, public_id: "" });
-                        syncNeeded = true;
-                    }
-                });
-                
-                if (syncNeeded && !window.gallerySyncedInSession) {
-                    window.gallerySyncedInSession = true;
-                    db.collection("configuraciones").doc("cooking-pollos").update({ gallery_media: window.globalGalleryArray }).catch(()=>{});
-                }
 
                 renderUserDynamicMenu();
                 renderMainPageBanners();
@@ -1176,6 +1086,7 @@
             block.style.display = "block";
             if (arrayType === 'banners') renderAdminBannersUI();
             if (arrayType === 'text_banners') renderAdminTextBannersUI();
+            if (arrayType === 'orders') cargarHistorialPedidosAdmin();
         } else { block.style.display = "none"; }
     }
 
@@ -1759,6 +1670,7 @@
             closeModalTop(); 
             openModal('adminModal'); 
             cargarEstadisticasAdmin();
+            cargarHistorialPedidosAdmin();
         } else { customAlert("PIN incorrecto.", "Security"); }
         document.getElementById('input-login-pin').value = "";
     }
@@ -1900,7 +1812,6 @@
     }
     function closeZoomModal() { document.getElementById('zoomModal').innerHTML = ""; closeModalTop(); }
 
-    /* MOTOR DE CONSOLIDACIÓN */
     function getConsolidatedCart() {
         let consolidated = {};
         
@@ -1967,14 +1878,26 @@
 
     function sendWhatsApp(method) {
         let userName = document.getElementById('user-name').value.trim();
+        let manualDir = document.getElementById('delivery-address').value.trim();
+        
         let msg = `¡Hola, mi pedido para *${currentGlobalTitle || 'Cooking Pollos'}* es! 🍗%0A*${deliveryMode}*%0A*Cliente:* ${userName}%0A%0A`;
         
         let consolidated = getConsolidatedCart();
+        let orderItemsArray = [];
         
         for (let name in consolidated) {
             let item = consolidated[name];
-            let combinedNotes = item.notes.length > 0 ? ` (${item.notes.join(" | ")})` : "";
-            msg += `• ${item.qty}x ${name}    *₡${(item.qty * item.price).toLocaleString()}*${combinedNotes}%0A`;
+            let combinedNotesStr = item.notes.length > 0 ? item.notes.join(" | ") : "";
+            let combinedNotesFormatted = combinedNotesStr ? ` (${combinedNotesStr})` : "";
+            
+            msg += `• ${item.qty}x ${name}    *₡${(item.qty * item.price).toLocaleString()}*${combinedNotesFormatted}%0A`;
+            
+            orderItemsArray.push({
+                name: name,
+                qty: item.qty,
+                price: item.price,
+                notes: combinedNotesStr
+            });
         }
 
         msg += `%0A*Total Neto a Pagar: ₡${total.toLocaleString()}*%0A*Método de Pago:* ${method}`;
@@ -1983,11 +1906,41 @@
         }
         if (deliveryMode === "ENVÍO EXPRESS") {
             if (gpsCoords !== "") msg += `%0A📍 *Ruta de Entrega:* https://maps.google.com/?q=${gpsCoords}`;
-            let manualDir = document.getElementById('delivery-address').value.trim(); if (manualDir !== "") msg += `%0A🏠 *Señas/Dirección:* ${manualDir}`;
+            if (manualDir !== "") msg += `%0A🏠 *Señas/Dirección:* ${manualDir}`;
             msg += `%0A%0A⚠️ _Favor coordinar costo de envío por este medio._`;
         }
+
+        // REGISTRO AUTOMÁTICO DE FIRESTORE (TIQUETERA EN LA NUBE)
+        try {
+            let nowObj = new Date();
+            let optionsDate = { timeZone: "America/Costa_Rica", year: 'numeric', month: '2-digit', day: '2-digit' };
+            let optionsTime = { timeZone: "America/Costa_Rica", hour: '2-digit', minute: '2-digit', hour12: true };
+            
+            let fechaStr = nowObj.toLocaleDateString('es-CR', optionsDate);
+            let horaStr = nowObj.toLocaleTimeString('es-CR', optionsTime);
+
+            let orderDataToSave = {
+                cliente: userName,
+                tipoEntrega: deliveryMode,
+                direccion: manualDir,
+                gps: gpsCoords,
+                metodoPago: method,
+                montoTotal: total,
+                pagaCon: cashPaidAmount,
+                vuelto: changeNeeded,
+                items: orderItemsArray,
+                fechaStr: fechaStr,
+                horaStr: horaStr,
+                timestampRaw: Date.now()
+            };
+
+            db.collection("pedidos").add(orderDataToSave).catch(err => console.error("Error al guardar pedido en BD:", err));
+        } catch (e) { console.error("Error registrando tiquete:", e); }
         
-        closeModals(); let waUrl = `https://wa.me/506${currentGlobalWhatsApp}?text=${msg}`; resetCartAndInputs(); window.location.href = waUrl;
+        closeModals(); 
+        let waUrl = `https://wa.me/506${currentGlobalWhatsApp}?text=${msg}`; 
+        resetCartAndInputs(); 
+        window.location.href = waUrl;
     }
 </script>
 </body>
