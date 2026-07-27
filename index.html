@@ -114,6 +114,17 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 0.82rem; line-height: 1.4; position: relative;
         }
 
+        /* ESTILOS DEL CALENDARIO NATIVO DEL SISTEMA */
+        .cal-day-cell {
+            padding: 9px 0; font-size: 0.8rem; font-weight: bold; border-radius: 6px; cursor: pointer;
+            background: #1c1c1c; color: #fff; border: 1px solid #2a2a2a; transition: 0.2s; user-select: none;
+        }
+        .cal-day-cell:hover { background: #333; }
+        .cal-day-cell.today-border { border-color: #00ffcc !important; color: #00ffcc; }
+        .cal-day-cell.selected-endpoint { background: #0026ff !important; color: #fff !important; border-color: #00ffcc !important; font-weight: bold; }
+        .cal-day-cell.in-range { background: rgba(0, 38, 255, 0.4) !important; color: #fff !important; }
+        .cal-day-cell.disabled { opacity: 0.15; pointer-events: none; }
+
         #zoomModal { background-color: rgba(0, 0, 0, 0.95); cursor: zoom-out; }
         #zoomModal img, #zoomModal video { max-width: 95%; max-height: 85%; border-radius: 10px; }
 
@@ -211,7 +222,7 @@
         </div>
     </div>
 
-    <p class="version-tag">Versión 13.8.0 (Filtro por Fecha, Totales y GPS Exacto)</p>
+    <p class="version-tag">Versión 13.9</p>
 
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span></div>
@@ -346,7 +357,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v13.8.0)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v13.9)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -370,7 +381,7 @@
             </button>
         </div>
 
-        <!-- SECCIÓN TIQUETERA / HISTORIAL DE PEDIDOS Y BÚSQUEDA POR DÍA -->
+        <!-- SECCIÓN TIQUETERA / CALENDARIO Y VENTAS -->
         <div class="admin-section-title"><i class="fas fa-receipt"></i> Historial de Pedidos (Tiquetera)</div>
         <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-orders-block', 'orders')" style="background:#222; color:white; border-color:#333; margin-bottom:15px;">
             <i class="fas fa-receipt"></i> Ver Historial de Pedidos Guardados
@@ -378,22 +389,43 @@
         
         <div id="admin-orders-block" style="display:none; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
             
-            <!-- SELECTOR DE FECHA / HISTORIAL POR DÍA -->
-            <div style="background:#0e0e0e; border:1px solid #0026ff; padding:10px; border-radius:8px; margin-bottom:12px;">
-                <label style="display:block; font-size:0.8rem; color:#00ffcc; font-weight:bold; margin-bottom:6px;">
-                    <i class="fas fa-calendar-alt"></i> Filtrar Historial por Día:
-                </label>
-                <div style="display:flex; gap:8px;">
-                    <select id="admin-orders-date-select" class="admin-input" onchange="filterAdminOrdersBySelectedDate()" style="flex:1; margin-bottom:0;">
-                        <option value="ALL">Cargando fechas disponibles...</option>
-                    </select>
+            <!-- CALENDARIO NATIVO PERSONALIZADO -->
+            <div style="background:#0e0e0e; border:1px solid #0026ff; padding:12px; border-radius:10px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <label style="font-size:0.85rem; color:#00ffcc; font-weight:bold;">
+                        <i class="fas fa-calendar-alt"></i> Consulta de Historial
+                    </label>
+                    <span id="cal-selected-label" style="font-size:0.78rem; color:#25D366; font-weight:bold;">HOY</span>
                 </div>
+                
+                <!-- Botones Rápidos -->
+                <div style="display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn-ticket" style="flex:1; padding:5px; font-size:0.75rem; border-color:#00ffcc; color:#00ffcc;" onclick="selectCalendarPreset('today')">Hoy</button>
+                    <button type="button" class="btn-ticket" style="flex:1; padding:5px; font-size:0.75rem;" onclick="selectCalendarPreset('yesterday')">Ayer</button>
+                    <button type="button" class="btn-ticket" style="flex:1; padding:5px; font-size:0.75rem;" onclick="selectCalendarPreset('month')">Este Mes</button>
+                    <button type="button" class="btn-ticket" style="flex:1; padding:5px; font-size:0.75rem;" onclick="selectCalendarPreset('all')">Todo</button>
+                </div>
+
+                <!-- Navegación Mes / Año -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#181818; padding:6px 10px; border-radius:6px; border:1px solid #333;">
+                    <button type="button" class="btn-qty" style="width:30px; height:30px;" onclick="changeCalMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span id="cal-month-year-title" style="font-weight:bold; font-size:0.9rem; color:#fff;">Cargando...</span>
+                    <button type="button" class="btn-qty" style="width:30px; height:30px;" onclick="changeCalMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <!-- Días de la Semana -->
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:2px; text-align:center; font-weight:bold; font-size:0.7rem; color:#aaa; margin-bottom:6px;">
+                    <div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div>
+                </div>
+
+                <!-- Grilla de Días -->
+                <div id="cal-days-grid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; text-align:center;"></div>
             </div>
 
-            <!-- CONTADORES TOTALES DEL DÍA -->
+            <!-- CONTADORES TOTALES DEL RANGO O DÍA SELECCIONADO -->
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <div style="flex:1; background:rgba(0,255,204,0.08); border:1px solid #00ffcc; padding:10px; border-radius:8px; text-align:center;">
-                    <div style="font-size:0.68rem; color:#aaa; font-weight:bold;">PEDIDOS DEL DÍA</div>
+                    <div style="font-size:0.68rem; color:#aaa; font-weight:bold;">PEDIDOS REALIZADOS</div>
                     <div id="stat-orders-count" style="font-size:1.3rem; font-weight:bold; color:#00ffcc;">0</div>
                 </div>
                 <div style="flex:1; background:rgba(37,211,102,0.08); border:1px solid #25D366; padding:10px; border-radius:8px; text-align:center;">
@@ -517,7 +549,8 @@
 
     const daysOrder = ['lu', 'ma', 'mi', 'ju', 'vi', 'sa', 'do'];
     const daysNames = { lu: "Lunes", ma: "Martes", mi: "Miércoles", ju: "Jueves", vi: "Viernes", sa: "Sábado", do: "Domingo" };
-    
+    const monthNamesEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
     window.currentScheduleData = {};
     window.localMenuArray = []; 
     window.adminExpandedCats = {}; 
@@ -527,8 +560,13 @@
     
     window.globalGalleryArray = [];
     window.rawOrdersList = []; 
-    let galleryTarget = { type: '', catIdx: null, prodIdx: null, bannerIdx: null };
 
+    // ESTADO DEL CALENDARIO
+    let calViewDate = new Date();
+    let calSelStart = null;
+    let calSelEnd = null;
+
+    let galleryTarget = { type: '', catIdx: null, prodIdx: null, bannerIdx: null };
     let modalStack = [];
 
     function checkModalLock() {
@@ -750,7 +788,152 @@
         });
     }
 
-    /* CARGAR HISTORIAL DE PEDIDOS, FILTRO POR DÍA Y CONTADORES */
+    /* FUNCIONES DE NAVEGACIÓN Y RENDER DEL CALENDARIO NATIVO */
+    function formatDateYYYYMMDD(d) {
+        let y = d.getFullYear();
+        let m = (d.getMonth() + 1).toString().padStart(2, '0');
+        let day = d.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function parseYYYYMMDD(s) {
+        let parts = s.split('-');
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    }
+
+    function getCRTodayDate() {
+        let crStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Costa_Rica' });
+        return parseYYYYMMDD(crStr);
+    }
+
+    function initCalendarState() {
+        let today = getCRTodayDate();
+        calViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        calSelStart = formatDateYYYYMMDD(today);
+        calSelEnd = formatDateYYYYMMDD(today);
+    }
+
+    function renderCustomCalendar() {
+        let year = calViewDate.getFullYear();
+        let month = calViewDate.getMonth();
+
+        let titleEl = document.getElementById('cal-month-year-title');
+        if (titleEl) titleEl.innerText = `${monthNamesEs[month]} ${year}`;
+
+        let grid = document.getElementById('cal-days-grid');
+        if (!grid) return;
+        grid.innerHTML = "";
+
+        let firstDayIndex = new Date(year, month, 1).getDay(); // 0 = Domingo
+        let totalDays = new Date(year, month + 1, 0).getDate();
+        let todayStr = formatDateYYYYMMDD(getCRTodayDate());
+
+        // Espacios vacíos antes del primer día del mes
+        for (let i = 0; i < firstDayIndex; i++) {
+            let emptyCell = document.createElement('div');
+            emptyCell.className = 'cal-day-cell disabled';
+            emptyCell.style.background = 'transparent';
+            emptyCell.style.border = 'none';
+            grid.appendChild(emptyCell);
+        }
+
+        // Celdas de días
+        for (let d = 1; d <= totalDays; d++) {
+            let dateObj = new Date(year, month, d);
+            let dateStr = formatDateYYYYMMDD(dateObj);
+
+            let cell = document.createElement('div');
+            cell.className = 'cal-day-cell';
+            cell.innerText = d;
+
+            if (dateStr === todayStr) {
+                cell.classList.add('today-border');
+            }
+
+            // Aplicar estilos de selección o rango
+            if (calSelStart && !calSelEnd) {
+                if (dateStr === calSelStart) cell.classList.add('selected-endpoint');
+            } else if (calSelStart && calSelEnd) {
+                if (dateStr === calSelStart || dateStr === calSelEnd) {
+                    cell.classList.add('selected-endpoint');
+                } else if (dateStr > calSelStart && dateStr < calSelEnd) {
+                    cell.classList.add('in-range');
+                }
+            }
+
+            cell.onclick = () => onCalendarDayClick(dateStr);
+            grid.appendChild(cell);
+        }
+
+        // Actualizar Etiqueta del Rango
+        let labelEl = document.getElementById('cal-selected-label');
+        if (labelEl) {
+            if (!calSelStart && !calSelEnd) {
+                labelEl.innerText = "HISTORIAL COMPLETO";
+            } else if (calSelStart === todayStr && (calSelEnd === todayStr || !calSelEnd)) {
+                labelEl.innerText = "HOY";
+            } else if (!calSelEnd || calSelStart === calSelEnd) {
+                let p = calSelStart.split('-');
+                labelEl.innerText = `${p[2]}/${p[1]}/${p[0]}`;
+            } else {
+                let p1 = calSelStart.split('-');
+                let p2 = calSelEnd.split('-');
+                labelEl.innerText = `${p1[2]}/${p1[1]} al ${p2[2]}/${p2[1]}`;
+            }
+        }
+    }
+
+    function onCalendarDayClick(dateStr) {
+        if (!calSelStart || (calSelStart && calSelEnd)) {
+            calSelStart = dateStr;
+            calSelEnd = null;
+        } else if (calSelStart && !calSelEnd) {
+            if (dateStr >= calSelStart) {
+                calSelEnd = dateStr;
+            } else {
+                calSelEnd = calSelStart;
+                calSelStart = dateStr;
+            }
+        }
+        renderCustomCalendar();
+        filterAdminOrdersBySelectedDate();
+    }
+
+    function changeCalMonth(dir) {
+        calViewDate.setMonth(calViewDate.getMonth() + dir);
+        renderCustomCalendar();
+    }
+
+    function selectCalendarPreset(preset) {
+        let today = getCRTodayDate();
+        let todayStr = formatDateYYYYMMDD(today);
+
+        if (preset === 'today') {
+            calSelStart = todayStr;
+            calSelEnd = todayStr;
+            calViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        } else if (preset === 'yesterday') {
+            let yest = new Date(today);
+            yest.setDate(yest.getDate() - 1);
+            let yestStr = formatDateYYYYMMDD(yest);
+            calSelStart = yestStr;
+            calSelEnd = yestStr;
+            calViewDate = new Date(yest.getFullYear(), yest.getMonth(), 1);
+        } else if (preset === 'month') {
+            let firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            let lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            calSelStart = formatDateYYYYMMDD(firstDay);
+            calSelEnd = formatDateYYYYMMDD(lastDay);
+            calViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        } else if (preset === 'all') {
+            calSelStart = null;
+            calSelEnd = null;
+        }
+        renderCustomCalendar();
+        filterAdminOrdersBySelectedDate();
+    }
+
+    /* CARGAR HISTORIAL DE PEDIDOS Y FILTRADO */
     function cargarHistorialPedidosAdmin() {
         let container = document.getElementById('admin-orders-list-container');
         if (!container) return;
@@ -759,9 +942,14 @@
         db.collection("pedidos").get().then(snapshot => {
             if (snapshot.empty) {
                 window.rawOrdersList = [];
-                container.innerHTML = `<p style="color:#888; font-style:italic; font-size:0.8rem; text-align:center; padding:10px;">No hay pedidos registrados en la tiquetera.</p>`;
+                container.innerHTML = `
+                    <div style="background: rgba(255,255,255,0.02); border: 1px dashed #444; padding: 25px 15px; border-radius: 10px; text-align: center; margin-top: 10px;">
+                        <i class="fas fa-folder-open" style="font-size: 2rem; color: #555; margin-bottom: 8px; display: block;"></i>
+                        <span style="color: #aaa; font-size: 0.9rem; font-weight: bold;">Sin pedidos registrados</span>
+                        <p style="color: #666; font-size: 0.78rem; margin: 5px 0 0 0;">La tiquetera en la nube está completamente vacía.</p>
+                    </div>
+                `;
                 actualizarContadoresPedidos([]);
-                poblarSelectorFechasOrders([]);
                 return;
             }
 
@@ -775,7 +963,8 @@
             list.sort((a, b) => (b.timestampRaw || 0) - (a.timestampRaw || 0));
             window.rawOrdersList = list;
 
-            poblarSelectorFechasOrders(list);
+            initCalendarState();
+            renderCustomCalendar();
             filterAdminOrdersBySelectedDate();
 
         }).catch(err => {
@@ -783,40 +972,29 @@
         });
     }
 
-    function poblarSelectorFechasOrders(orders) {
-        let select = document.getElementById('admin-orders-date-select');
-        if (!select) return;
-
-        let dateMap = {};
-        orders.forEach(ord => {
-            if (ord.fechaStr) dateMap[ord.fechaStr] = true;
-        });
-
-        let availableDates = Object.keys(dateMap);
-        let optionsHtml = `<option value="ALL">🗓️ Ver Todos los Días (Historial Completo)</option>`;
-        
-        let todayStr = new Date().toLocaleDateString('es-CR', { timeZone: "America/Costa_Rica", year: 'numeric', month: '2-digit', day: '2-digit' });
-
-        availableDates.forEach(fStr => {
-            let label = (fStr === todayStr) ? `HOY (${fStr})` : fStr;
-            optionsHtml += `<option value="${fStr}">${label}</option>`;
-        });
-
-        select.innerHTML = optionsHtml;
-        select.value = todayStr; // Seleccionar HOY por defecto si existe
-        if (!dateMap[todayStr] && availableDates.length > 0) {
-            select.value = availableDates[0];
-        }
-    }
-
     function filterAdminOrdersBySelectedDate() {
-        let select = document.getElementById('admin-orders-date-select');
-        let selectedDate = select ? select.value : 'ALL';
+        let filteredList = window.rawOrdersList.filter(ord => {
+            if (!calSelStart && !calSelEnd) return true; // Opción 'Todo'
 
-        let filteredList = window.rawOrdersList;
-        if (selectedDate !== 'ALL') {
-            filteredList = window.rawOrdersList.filter(o => o.fechaStr === selectedDate);
-        }
+            let orderDateStr = "";
+            if (ord.timestampRaw) {
+                orderDateStr = new Date(ord.timestampRaw).toLocaleDateString('en-CA', { timeZone: 'America/Costa_Rica' });
+            } else if (ord.fechaStr) {
+                let parts = ord.fechaStr.split('/');
+                if (parts.length === 3) {
+                    orderDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                }
+            }
+
+            if (!orderDateStr) return false;
+
+            if (calSelStart && !calSelEnd) {
+                return orderDateStr === calSelStart;
+            } else if (calSelStart && calSelEnd) {
+                return orderDateStr >= calSelStart && orderDateStr <= calSelEnd;
+            }
+            return true;
+        });
 
         renderAdminOrdersCards(filteredList);
         actualizarContadoresPedidos(filteredList);
@@ -838,7 +1016,13 @@
         if (!container) return;
 
         if (ordersList.length === 0) {
-            container.innerHTML = `<p style="color:#888; font-style:italic; font-size:0.8rem; text-align:center; padding:15px;">No hay pedidos registrados para la fecha seleccionada.</p>`;
+            container.innerHTML = `
+                <div style="background: rgba(255,255,255,0.02); border: 1px dashed #444; padding: 25px 15px; border-radius: 10px; text-align: center; margin-top: 10px;">
+                    <i class="fas fa-folder-open" style="font-size: 2rem; color: #555; margin-bottom: 8px; display: block;"></i>
+                    <span style="color: #aaa; font-size: 0.9rem; font-weight: bold;">Sin pedidos registrados</span>
+                    <p style="color: #666; font-size: 0.78rem; margin: 5px 0 0 0;">No hay facturas guardadas para la fecha o rango seleccionado.</p>
+                </div>
+            `;
             return;
         }
 
@@ -851,7 +1035,6 @@
                 html += `<div style="background:#0026ff; color:white; font-size:0.8rem; font-weight:bold; padding:4px 8px; border-radius:4px; margin:15px 0 10px 0; letter-spacing:1px; text-transform:uppercase;"><i class="fas fa-calendar-day"></i> Pedidos del Día: ${currentDayHeader}</div>`;
             }
 
-            // ENLACE GPS EXACTO SIN NOMBRE DE NEGOCIOS
             let gpsLinkHtml = "";
             if (ord.gps) {
                 gpsLinkHtml = `<div style="margin-top:4px;"><i class="fas fa-map-marker-alt" style="color:#0026ff;"></i> <b>Ubicación GPS Exacta:</b> <a href="https://www.google.com/maps?q=loc:${ord.gps}" target="_blank" style="color:#0026ff; font-weight:bold; text-decoration:underline;">Ver Coordenadas en Google Maps</a></div>`;
