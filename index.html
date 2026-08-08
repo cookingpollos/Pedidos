@@ -131,7 +131,7 @@
             <a id="link-tk" class="social-row-btn" href="#" target="_blank" style="color: #ffffff;"><i class="fab fa-tiktok"></i> <span id="text-tk" style="color:white;">TikTok</span></a>
         </div>
     </div>
-    <p class="version-tag">Versión 14.4</p>
+    <p class="version-tag">Versión 14.5</p>
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span><div id="express-fee-badge" style="display:none; font-size:0.8rem; color:#00ffcc; margin-top:2px; font-weight:normal;"></div></div>
         <div class="footer-btns"><button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button></div>
@@ -250,7 +250,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.4)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.5)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -827,11 +827,10 @@
         });
     }
 
-    async function trackMediaInCloudGallery(url, publicId) {
+    function addMediaToLocalGallery(url, publicId) {
         if(!window.globalGalleryArray) window.globalGalleryArray = [];
         if(!window.globalGalleryArray.some(item => item && item.url === url)) {
             window.globalGalleryArray.unshift({ url: url, public_id: publicId || "" });
-            await db.collection("configuraciones").doc("cooking-pollos").update({ gallery_media: window.globalGalleryArray }).catch(()=>{});
         }
     }
 
@@ -912,7 +911,7 @@
     function deleteAdminBannerItem(idx) { window.localBannersArray.splice(idx, 1); renderAdminBannersUI(); renderAdminTextBannersUI(); }
     function addAdminTextBannerItem() { window.localTextBannersArray.push({ active: true, text: "Escribe un aviso publicitario aquí...", fontSize: 24, lineHeight: 140, letterSpacing: 0, position: "start", url: "", fontUrl: "", useFont: true, strokeSize: 0, strokeColor: "#000000", textColor: "#ffffff", ledStroke: false }); renderAdminTextBannersUI(); }
     function updateAdminTextBannerField(idx, field, val) { window.localTextBannersArray[idx][field] = val; }
-    function deleteAdminTextBannerItem(idx) { window.localTextBannersArray.splice(idx, 1); renderAdminTextBannersUI(); }
+    function deleteAdminTextBannerItem(idx) { window.localTextBannersArray.splice(idx, 1); renderAdminTextBannerItem(); }
 
     async function uploadTextBannerMediaFile(input, idx) {
         let file = input.files[0]; if(!file) return; customAlert("Subiendo archivo a ImageKit...", "Subiendo Asset");
@@ -920,8 +919,11 @@
             const data = await uploadToImageKit(file);
             if (data && data.url) {
                 window.localTextBannersArray[idx].url = data.url; 
-                await trackMediaInCloudGallery(data.url, data.fileId);
-                await db.collection("configuraciones").doc("cooking-pollos").update({ text_banners: window.localTextBannersArray });
+                addMediaToLocalGallery(data.url, data.fileId);
+                await db.collection("configuraciones").doc("cooking-pollos").update({ 
+                    text_banners: window.localTextBannersArray,
+                    gallery_media: window.globalGalleryArray 
+                });
                 document.getElementById(`media-link-status-${idx}`).innerHTML = `<div style="margin-top:6px; text-align:right; font-size:0.75rem; color:#25D366; font-weight:bold;"><i class="fas fa-check-circle"></i> Archivo Vinculado <span style="color:#ea4335; cursor:pointer; margin-left:8px;" onclick="clearTextBannerMedia(${idx})">[Quitar]</span></div>`;
                 updateAdminTextBannerLive(idx, 'url', data.url); 
                 renderMainPageBanners();
@@ -936,7 +938,11 @@
             const data = await uploadToImageKit(file);
             if (data && data.url) {
                 window.localTextBannersArray[idx].fontUrl = data.url; window.localTextBannersArray[idx].useFont = true;
-                await db.collection("configuraciones").doc("cooking-pollos").update({ text_banners: window.localTextBannersArray });
+                addMediaToLocalGallery(data.url, data.fileId);
+                await db.collection("configuraciones").doc("cooking-pollos").update({ 
+                    text_banners: window.localTextBannersArray,
+                    gallery_media: window.globalGalleryArray 
+                });
                 document.getElementById(`font-link-status-${idx}`).innerHTML = `<div style="margin-top:6px; text-align:right; font-size:0.75rem; color:#0026ff; font-weight:bold;"><i class="fas fa-link"></i> Letra Guardada <span style="color:#25D366;">(Activa)</span> <span style="color:#ea4335; cursor:pointer; margin-left:8px;" onclick="clearTextBannerFont(${idx})">[Eliminar]</span></div>`;
                 updateAdminTextBannerLive(idx, 'fontUrl', data.url); 
                 renderMainPageBanners();
@@ -968,8 +974,11 @@
             const data = await uploadToImageKit(file);
             if (data && data.url) { 
                 window.localBannersArray[idx].url = data.url; 
-                await trackMediaInCloudGallery(data.url, data.fileId); 
-                await db.collection("configuraciones").doc("cooking-pollos").update({ banners: window.localBannersArray });
+                addMediaToLocalGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ 
+                    banners: window.localBannersArray,
+                    gallery_media: window.globalGalleryArray 
+                });
                 renderAdminBannersUI(); 
                 renderAdminTextBannersUI(); 
                 renderMainPageBanners();
@@ -1030,8 +1039,11 @@
             const data = await uploadToImageKit(file);
             if (data && data.url) { 
                 window.localMenuArray[catIdx].products[prodIdx].img = data.url; 
-                await trackMediaInCloudGallery(data.url, data.fileId); 
-                await db.collection("configuraciones").doc("cooking-pollos").update({ menu: window.localMenuArray });
+                addMediaToLocalGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ 
+                    menu: window.localMenuArray,
+                    gallery_media: window.globalGalleryArray 
+                });
                 renderAdminMenuUI(); 
                 renderUserDynamicMenu();
                 customAlert("¡Imagen publicada en vivo para todos los navegadores!", "¡Éxito!"); 
@@ -1046,8 +1058,11 @@
             if (data && data.url) { 
                 document.getElementById('input-bg-url').value = data.url; 
                 document.getElementById('btn-delete-bg').style.display = "inline-flex"; 
-                await trackMediaInCloudGallery(data.url, data.fileId); 
-                await db.collection("configuraciones").doc("cooking-pollos").update({ bg_url: data.url });
+                addMediaToLocalGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ 
+                    bg_url: data.url,
+                    gallery_media: window.globalGalleryArray 
+                });
                 customAlert("¡Fondo cargado y publicado!", "Éxito"); 
             }
         } catch (e) { customAlert("Error: " + e.message); }
@@ -1060,8 +1075,11 @@
             if (data && data.url) { 
                 document.getElementById('input-profile-url').value = data.url; 
                 document.getElementById('btn-delete-profile').style.display = "inline-flex"; 
-                await trackMediaInCloudGallery(data.url, data.fileId); 
-                await db.collection("configuraciones").doc("cooking-pollos").update({ profile_url: data.url });
+                addMediaToLocalGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ 
+                    profile_url: data.url,
+                    gallery_media: window.globalGalleryArray 
+                });
                 customAlert("¡Logo cargado y publicado!", "Éxito"); 
             }
         } catch (e) { customAlert("Error: " + e.message); }
