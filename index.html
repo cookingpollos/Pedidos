@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Pedidos | Cloud Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
     <style>
         img, video { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
         body.modal-lock { overflow: hidden !important; height: 100vh !important; touch-action: none; }
@@ -128,7 +131,7 @@
             <a id="link-tk" class="social-row-btn" href="#" target="_blank" style="color: #ffffff;"><i class="fab fa-tiktok"></i> <span id="text-tk" style="color:white;">TikTok</span></a>
         </div>
     </div>
-    <p class="version-tag">Versión 14.1</p>
+    <p class="version-tag">Versión 14.2</p>
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span><div id="express-fee-badge" style="display:none; font-size:0.8rem; color:#00ffcc; margin-top:2px; font-weight:normal;"></div></div>
         <div class="footer-btns"><button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button></div>
@@ -231,8 +234,8 @@
 <div id="loginModal" class="modal-overlay" onclick="closeModalTop()">
     <div class="modal-box" onclick="event.stopPropagation()" style="background: #141414; color: white; border: 2px solid #0026ff; max-width: 320px;">
         <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-lock"></i> Acceso Admin</h3>
-        <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px; text-align:center;">Ingresa el PIN de seguridad para abrir el panel.</p>
-        <input type="password" id="input-login-pin" class="name-input" placeholder="••••" inputmode="numeric" pattern="[0-9]*" style="text-align: center; font-size: 1.6rem; letter-spacing: 6px; background: #222; border-color: #444; color: white; padding: 10px 0;">
+        <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px; text-align:center;">Ingresa la contraseña para abrir el panel de administración.</p>
+        <input type="password" id="input-login-pin" class="name-input" placeholder="••••" style="text-align: center; font-size: 1.4rem; background: #222; border-color: #444; color: white; padding: 10px 0;">
         <div class="admin-actions" style="margin-top: 20px;"><button class="btn-admin-save" onclick="verifyAdminPin()">Entrar</button><button class="btn-admin-close" onclick="closeModalTop()">Cancelar</button></div>
     </div>
 </div>
@@ -247,7 +250,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.1)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.2)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -304,7 +307,7 @@
             <div id="admin-banners-list-container"></div>
         </div>
 
-        <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-text-banners-management-block', 'text_banners')" style="background:#222; color:white; border-color:#333; margin-bottom:15px;"><i class="fas fa-font"></i> Gestionar Banners de Texto LED</button>
+        <button class="pay-option-btn" onclick="toggleAdminSectionBlock('admin-text-banners-management-block', 'text_banners')" style="background:#222; color:white; border-color:#333; margin-bottom:10px;"><i class="fas fa-font"></i> Gestionar Banners de Texto LED</button>
         <div id="admin-text-banners-management-block" style="display:none; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
             <button class="btn-pickup" style="background:#0026ff; border:none; width:100%; margin-bottom:12px; padding:10px;" onclick="addAdminTextBannerItem()"><i class="fas fa-plus"></i> Agregar Banner de Texto</button>
             <div id="admin-text-banners-list-container"></div>
@@ -376,7 +379,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // CONFIGURACIÓN IMAGEKIT
     const IMAGEKIT_ENDPOINT = "https://ik.imagekit.io/cookingpollos";
     const IMAGEKIT_PUBLIC_KEY = "public_cVzOUvmm/nkPKK+AP3/S3BsoTCY=";
 
@@ -1019,29 +1021,51 @@
     }
 
     function verifyAdminPin() {
-        let enteredPin = document.getElementById('input-login-pin').value.trim(), hashedEntered = CryptoJS.SHA256(enteredPin).toString();
-        if (enteredPin === currentGlobalPin || hashedEntered === currentGlobalPin) { closeModalTop(); openModal('adminModal'); cargarEstadisticasAdmin(); cargarHistorialPedidosAdmin(); }
-        else customAlert("PIN incorrecto.", "Security");
+        let enteredPin = document.getElementById('input-login-pin').value.trim();
+        
+        firebase.auth().signInWithEmailAndPassword("janmadb@gmail.com", enteredPin)
+        .then(() => {
+            closeModalTop(); 
+            openModal('adminModal'); 
+            cargarEstadisticasAdmin();
+            cargarHistorialPedidosAdmin();
+        })
+        .catch((error) => {
+            let hashedEntered = CryptoJS.SHA256(enteredPin).toString();
+            if (enteredPin === currentGlobalPin || hashedEntered === currentGlobalPin) {
+                closeModalTop(); 
+                openModal('adminModal'); 
+                cargarEstadisticasAdmin();
+                cargarHistorialPedidosAdmin();
+            } else { 
+                customAlert("Contraseña o PIN incorrecto.", "Seguridad"); 
+            }
+        });
         document.getElementById('input-login-pin').value = "";
     }
 
     function applyAdminChanges() {
         let newPinInput = document.getElementById('input-admin-pin').value.trim(), pinToSave = newPinInput !== "" ? CryptoJS.SHA256(newPinInput).toString() : currentGlobalPin;
         let updateConfigObject = {
-            admin_pin: pinToSave, menu: window.localMenuArray, bg_url: document.getElementById('input-bg-url').value.trim(), profile_url: document.getElementById('input-profile-url').value.trim(),
+            admin_pin: pinToSave, menu: window.localMenuArray || [], bg_url: document.getElementById('input-bg-url').value.trim(), profile_url: document.getElementById('input-profile-url').value.trim(),
             page_title: document.getElementById('input-page-title').value.trim(), whatsapp: document.getElementById('input-whatsapp').value.trim(), sinpe_num: document.getElementById('input-sinpe-num').value.trim(),
             sinpe_name: document.getElementById('input-sinpe-name').value.trim(), maps_url: document.getElementById('input-maps-url').value.trim(), business_location: document.getElementById('input-business-location').value.trim(),
             señas_local: document.getElementById('input-señas-local').value.trim(), description: document.getElementById('input-description').value.trim(), fb: document.getElementById('input-fb').value.trim(),
             fb_name: document.getElementById('input-fb-name').value.trim(), ig: document.getElementById('input-ig').value.trim(), ig_name: document.getElementById('input-ig-name').value.trim(),
-            tk: document.getElementById('input-tk').value.trim(), tk_name: document.getElementById('input-tk-name').value.trim(), banners: window.localBannersArray, text_banners: window.localTextBannersArray,
-            delivery_ranges: window.localDeliveryRanges, gallery_media: window.globalGalleryArray
+            tk: document.getElementById('input-tk').value.trim(), tk_name: document.getElementById('input-tk-name').value.trim(), banners: window.localBannersArray || [], text_banners: window.localTextBannersArray || [],
+            delivery_ranges: window.localDeliveryRanges || [], gallery_media: window.globalGalleryArray || []
         };
         daysOrder.forEach(day => {
             updateConfigObject[day + '_status'] = document.getElementById(`input-${day}-status`).value;
             updateConfigObject[day + '_open'] = document.getElementById(`input-${day}-open`).value.trim() || "11:00 AM";
-            updateConfigObject[day + '_close'] = document.getElementById(`input-${day}-close`).value.trim() || "11:00 PM";
+            updateConfigObject[day + '_close'] = document.getElementById(`input-${day}-close`).value.trim() || "10:00 PM";
         });
-        db.collection("configuraciones").doc("cooking-pollos").set(updateConfigObject, { merge: true }).then(() => { customAlert("Cambios sincronizados con éxito en ImageKit.", "Nube Al Día"); closeModals(); renderUserDynamicMenu(); renderMainPageBanners(); }).catch(() => customAlert("Error al guardar."));
+
+        const cleanData = JSON.parse(JSON.stringify(updateConfigObject));
+
+        db.collection("configuraciones").doc("cooking-pollos").set(cleanData, { merge: true })
+        .then(() => { customAlert("Cambios sincronizados con éxito.", "Nube Al Día"); closeModals(); renderUserDynamicMenu(); renderMainPageBanners(); })
+        .catch((err) => { customAlert("Error al guardar: " + (err.message || "Verifica permisos")); });
     }
 
     function setExpress() {
