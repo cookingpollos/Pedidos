@@ -131,7 +131,7 @@
             <a id="link-tk" class="social-row-btn" href="#" target="_blank" style="color: #ffffff;"><i class="fab fa-tiktok"></i> <span id="text-tk" style="color:white;">TikTok</span></a>
         </div>
     </div>
-    <p class="version-tag">Versión 14.3</p>
+    <p class="version-tag">Versión 14.4</p>
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span><div id="express-fee-badge" style="display:none; font-size:0.8rem; color:#00ffcc; margin-top:2px; font-weight:normal;"></div></div>
         <div class="footer-btns"><button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button></div>
@@ -250,7 +250,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.3)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.4)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -368,7 +368,7 @@
         <div class="admin-field"><label>Enlace de TikTok</label><input type="text" id="input-tk" class="admin-input"></div>
         <div class="admin-field"><label>Nombre de Usuario TikTok</label><input type="text" id="input-tk-name" class="admin-input"></div>
         <div class="admin-actions">
-            <button class="btn-admin-save" onclick="applyAdminChanges()">Guardar en la Nube</button>
+            <button class="btn-admin-save" onclick="applyAdminChanges()">Guardar Todo en la Nube</button>
             <button class="btn-admin-close" onclick="closeModals()">Cancelar</button>
         </div>
     </div>
@@ -784,14 +784,37 @@
         });
     }
 
-    function selectMediaFromGallery(idx) {
+    async function selectMediaFromGallery(idx) {
         if (!window.globalGalleryArray[idx]) return;
         let selectedUrl = window.globalGalleryArray[idx].url;
-        if (galleryTarget.type === 'product') { window.localMenuArray[galleryTarget.catIdx].products[galleryTarget.prodIdx].img = selectedUrl; renderAdminMenuUI(); }
-        else if (galleryTarget.type === 'banner') { window.localBannersArray[galleryTarget.bannerIdx].url = selectedUrl; renderAdminBannersUI(); }
-        else if (galleryTarget.type === 'text_banner') { window.localTextBannersArray[galleryTarget.bannerIdx].url = selectedUrl; updateAdminTextBannerLive(galleryTarget.bannerIdx, 'url', selectedUrl); }
-        else if (galleryTarget.type === 'bg') { document.getElementById('input-bg-url').value = selectedUrl; document.getElementById('btn-delete-bg').style.display = "inline-flex"; }
-        else if (galleryTarget.type === 'profile') { document.getElementById('input-profile-url').value = selectedUrl; document.getElementById('btn-delete-profile').style.display = "inline-flex"; }
+        if (galleryTarget.type === 'product') { 
+            window.localMenuArray[galleryTarget.catIdx].products[galleryTarget.prodIdx].img = selectedUrl; 
+            await db.collection("configuraciones").doc("cooking-pollos").update({ menu: window.localMenuArray });
+            renderAdminMenuUI(); 
+            renderUserDynamicMenu();
+        }
+        else if (galleryTarget.type === 'banner') { 
+            window.localBannersArray[galleryTarget.bannerIdx].url = selectedUrl; 
+            await db.collection("configuraciones").doc("cooking-pollos").update({ banners: window.localBannersArray });
+            renderAdminBannersUI(); 
+            renderMainPageBanners();
+        }
+        else if (galleryTarget.type === 'text_banner') { 
+            window.localTextBannersArray[galleryTarget.bannerIdx].url = selectedUrl; 
+            await db.collection("configuraciones").doc("cooking-pollos").update({ text_banners: window.localTextBannersArray });
+            updateAdminTextBannerLive(galleryTarget.bannerIdx, 'url', selectedUrl); 
+            renderMainPageBanners();
+        }
+        else if (galleryTarget.type === 'bg') { 
+            document.getElementById('input-bg-url').value = selectedUrl; 
+            document.getElementById('btn-delete-bg').style.display = "inline-flex"; 
+            await db.collection("configuraciones").doc("cooking-pollos").update({ bg_url: selectedUrl });
+        }
+        else if (galleryTarget.type === 'profile') { 
+            document.getElementById('input-profile-url').value = selectedUrl; 
+            document.getElementById('btn-delete-profile').style.display = "inline-flex"; 
+            await db.collection("configuraciones").doc("cooking-pollos").update({ profile_url: selectedUrl });
+        }
         closeModalTop();
     }
 
@@ -896,9 +919,13 @@
         try {
             const data = await uploadToImageKit(file);
             if (data && data.url) {
-                window.localTextBannersArray[idx].url = data.url; await trackMediaInCloudGallery(data.url, data.fileId);
+                window.localTextBannersArray[idx].url = data.url; 
+                await trackMediaInCloudGallery(data.url, data.fileId);
+                await db.collection("configuraciones").doc("cooking-pollos").update({ text_banners: window.localTextBannersArray });
                 document.getElementById(`media-link-status-${idx}`).innerHTML = `<div style="margin-top:6px; text-align:right; font-size:0.75rem; color:#25D366; font-weight:bold;"><i class="fas fa-check-circle"></i> Archivo Vinculado <span style="color:#ea4335; cursor:pointer; margin-left:8px;" onclick="clearTextBannerMedia(${idx})">[Quitar]</span></div>`;
-                updateAdminTextBannerLive(idx, 'url', data.url); customAlert("¡Multimedia vinculado!", "Éxito");
+                updateAdminTextBannerLive(idx, 'url', data.url); 
+                renderMainPageBanners();
+                customAlert("¡Multimedia vinculado y guardado!", "Éxito");
             }
         } catch (e) { customAlert("Fallo en la carga: " + e.message); }
     }
@@ -909,20 +936,45 @@
             const data = await uploadToImageKit(file);
             if (data && data.url) {
                 window.localTextBannersArray[idx].fontUrl = data.url; window.localTextBannersArray[idx].useFont = true;
+                await db.collection("configuraciones").doc("cooking-pollos").update({ text_banners: window.localTextBannersArray });
                 document.getElementById(`font-link-status-${idx}`).innerHTML = `<div style="margin-top:6px; text-align:right; font-size:0.75rem; color:#0026ff; font-weight:bold;"><i class="fas fa-link"></i> Letra Guardada <span style="color:#25D366;">(Activa)</span> <span style="color:#ea4335; cursor:pointer; margin-left:8px;" onclick="clearTextBannerFont(${idx})">[Eliminar]</span></div>`;
-                updateAdminTextBannerLive(idx, 'fontUrl', data.url); customAlert("¡Tipografía registrada con éxito!", "Éxito");
+                updateAdminTextBannerLive(idx, 'fontUrl', data.url); 
+                renderMainPageBanners();
+                customAlert("¡Tipografía registrada con éxito!", "Éxito");
             }
         } catch (e) { customAlert("Error al procesar la letra: " + e.message); }
     }
 
-    function clearTextBannerMedia(idx) { window.localTextBannersArray[idx].url = ""; document.getElementById(`media-link-status-${idx}`).innerHTML = ""; updateAdminTextBannerLive(idx, 'url', ""); }
-    function clearTextBannerFont(idx) { window.localTextBannersArray[idx].fontUrl = ""; window.localTextBannersArray[idx].useFont = false; document.getElementById(`font-link-status-${idx}`).innerHTML = ""; updateAdminTextBannerLive(idx, 'fontUrl', ""); }
+    async function clearTextBannerMedia(idx) { 
+        window.localTextBannersArray[idx].url = ""; 
+        await db.collection("configuraciones").doc("cooking-pollos").update({ text_banners: window.localTextBannersArray });
+        document.getElementById(`media-link-status-${idx}`).innerHTML = ""; 
+        updateAdminTextBannerLive(idx, 'url', ""); 
+        renderMainPageBanners();
+    }
+    
+    async function clearTextBannerFont(idx) { 
+        window.localTextBannersArray[idx].fontUrl = ""; 
+        window.localTextBannersArray[idx].useFont = false; 
+        await db.collection("configuraciones").doc("cooking-pollos").update({ text_banners: window.localTextBannersArray });
+        document.getElementById(`font-link-status-${idx}`).innerHTML = ""; 
+        updateAdminTextBannerLive(idx, 'fontUrl', ""); 
+        renderMainPageBanners();
+    }
 
     async function uploadBannerMediaFile(input, idx) {
         let file = input.files[0]; if(!file) return; customAlert("Cargando multimedia en ImageKit...", "Subiendo Archivo");
         try {
             const data = await uploadToImageKit(file);
-            if (data && data.url) { window.localBannersArray[idx].url = data.url; await trackMediaInCloudGallery(data.url, data.fileId); renderAdminBannersUI(); renderAdminTextBannersUI(); customAlert("¡Multimedia cargado!", "¡Éxito!"); }
+            if (data && data.url) { 
+                window.localBannersArray[idx].url = data.url; 
+                await trackMediaInCloudGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ banners: window.localBannersArray });
+                renderAdminBannersUI(); 
+                renderAdminTextBannersUI(); 
+                renderMainPageBanners();
+                customAlert("¡Banner publicado en vivo!", "¡Éxito!"); 
+            }
         } catch (e) { customAlert("Error en la carga: " + e.message, "Fallo"); }
     }
 
@@ -976,7 +1028,14 @@
         let file = input.files[0]; if(!file) return; customAlert("Subiendo multimedia a ImageKit...", "Subiendo Archivo");
         try {
             const data = await uploadToImageKit(file);
-            if (data && data.url) { window.localMenuArray[catIdx].products[prodIdx].img = data.url; await trackMediaInCloudGallery(data.url, data.fileId); renderAdminMenuUI(); customAlert("¡Archivo subido con éxito!", "¡Éxito!"); }
+            if (data && data.url) { 
+                window.localMenuArray[catIdx].products[prodIdx].img = data.url; 
+                await trackMediaInCloudGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ menu: window.localMenuArray });
+                renderAdminMenuUI(); 
+                renderUserDynamicMenu();
+                customAlert("¡Imagen publicada en vivo para todos los navegadores!", "¡Éxito!"); 
+            }
         } catch (e) { customAlert("Fallo en la subida: " + e.message, "Error"); }
     }
 
@@ -984,7 +1043,13 @@
         let file = input.files[0]; if(!file) return; customAlert("Subiendo fondo a ImageKit...", "Subiendo Archivo");
         try {
             const data = await uploadToImageKit(file);
-            if (data && data.url) { document.getElementById('input-bg-url').value = data.url; document.getElementById('btn-delete-bg').style.display = "inline-flex"; await trackMediaInCloudGallery(data.url, data.fileId); customAlert("¡Fondo cargado!", "Éxito"); }
+            if (data && data.url) { 
+                document.getElementById('input-bg-url').value = data.url; 
+                document.getElementById('btn-delete-bg').style.display = "inline-flex"; 
+                await trackMediaInCloudGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ bg_url: data.url });
+                customAlert("¡Fondo cargado y publicado!", "Éxito"); 
+            }
         } catch (e) { customAlert("Error: " + e.message); }
     }
 
@@ -992,12 +1057,27 @@
         let file = input.files[0]; if(!file) return; customAlert("Subiendo logo a ImageKit...", "Subiendo Archivo");
         try {
             const data = await uploadToImageKit(file);
-            if (data && data.url) { document.getElementById('input-profile-url').value = data.url; document.getElementById('btn-delete-profile').style.display = "inline-flex"; await trackMediaInCloudGallery(data.url, data.fileId); customAlert("¡Logo cargado!", "Éxito"); }
+            if (data && data.url) { 
+                document.getElementById('input-profile-url').value = data.url; 
+                document.getElementById('btn-delete-profile').style.display = "inline-flex"; 
+                await trackMediaInCloudGallery(data.url, data.fileId); 
+                await db.collection("configuraciones").doc("cooking-pollos").update({ profile_url: data.url });
+                customAlert("¡Logo cargado y publicado!", "Éxito"); 
+            }
         } catch (e) { customAlert("Error: " + e.message); }
     }
 
-    function clearBgImage() { document.getElementById('input-bg-url').value = ""; document.getElementById('btn-delete-bg').style.display = "none"; }
-    function clearProfileImage() { document.getElementById('input-profile-url').value = ""; document.getElementById('btn-delete-profile').style.display = "none"; }
+    async function clearBgImage() { 
+        document.getElementById('input-bg-url').value = ""; 
+        document.getElementById('btn-delete-bg').style.display = "none"; 
+        await db.collection("configuraciones").doc("cooking-pollos").update({ bg_url: "" });
+    }
+    
+    async function clearProfileImage() { 
+        document.getElementById('input-profile-url').value = ""; 
+        document.getElementById('btn-delete-profile').style.display = "none"; 
+        await db.collection("configuraciones").doc("cooking-pollos").update({ profile_url: "" });
+    }
 
     function ejecutarEvaluadorCalendarioCR() {
         try {
@@ -1005,7 +1085,7 @@
             let statusHoy = window.currentScheduleData[todayKey + '_status'] || "abierto", badge = document.getElementById('schedule-badge');
             if (statusHoy === "cerrado") { badge.innerHTML = `<span class="dot-status" style="color:#ea4335; background:#ea4335;"></span> Cerrado - Horario`; badge.style.borderColor = "#ea4335"; badge.style.color = "#ea4335"; return; }
             let [crHour, crMin] = new Intl.DateTimeFormat("en-US", { timeZone: "America/Costa_Rica", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date()).split(':').map(Number);
-            let openMins = convertTimeToMinutes(window.currentScheduleData[todayKey + '_open'] || "11:00 AM"), closeMins = convertTimeToMinutes(window.currentScheduleData[todayKey + '_close'] || "11:00 PM"), currentMins = (crHour * 60) + crMin;
+            let openMins = convertTimeToMinutes(window.currentScheduleData[todayKey + '_open'] || "11:00 AM"), closeMins = convertTimeToMinutes(window.currentScheduleData[todayKey + '_close'] || "10:00 PM"), currentMins = (crHour * 60) + crMin;
             let isOpen = (closeMins > openMins) ? (currentMins >= openMins && currentMins < closeMins) : (currentMins >= openMins || currentMins < closeMins);
             if (isOpen) { badge.innerHTML = `<span class="dot-status" style="color:#25D366; background:#25D366;"></span> Abierto - Horario`; badge.style.borderColor = "#25D366"; badge.style.color = "#25D366"; }
             else { badge.innerHTML = `<span class="dot-status" style="color:#ea4335; background:#ea4335;"></span> Cerrado - Horario`; badge.style.borderColor = "#ea4335"; badge.style.color = "#ea4335"; }
@@ -1015,7 +1095,7 @@
     function showScheduleDetails() {
         let htmlList = `<div style="text-align:left; font-size:0.95rem; line-height:1.6; color:#fff; padding:5px 0;">`;
         daysOrder.forEach(key => {
-            let status = window.currentScheduleData[key + '_status'] || "abierto", open = window.currentScheduleData[key + '_open'] || "11:00 AM", close = window.currentScheduleData[key + '_close'] || "11:00 PM";
+            let status = window.currentScheduleData[key + '_status'] || "abierto", open = window.currentScheduleData[key + '_open'] || "11:00 AM", close = window.currentScheduleData[key + '_close'] || "10:00 PM";
             htmlList += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #333; padding:8px 0;"><span><b>${daysNames[key]}:</b></span><span>${(status === 'cerrado') ? `<span style="color:#ff4d4d; font-weight:bold;">Cerrado</span>` : `De ${open} a ${close}`}</span></div>`;
         });
         htmlList += `</div>`; customAlert(htmlList, "<i class='fas fa-calendar-alt' style='color:#0026ff;'></i> Horario de la Semana");
@@ -1188,4 +1268,3 @@
 </script>
 </body>
 </html>
-
