@@ -131,7 +131,7 @@
             <a id="link-tk" class="social-row-btn" href="#" target="_blank" style="color: #ffffff;"><i class="fab fa-tiktok"></i> <span id="text-tk" style="color:white;">TikTok</span></a>
         </div>
     </div>
-    <p class="version-tag">Versión 14.2</p>
+    <p class="version-tag">Versión 14.3</p>
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span><div id="express-fee-badge" style="display:none; font-size:0.8rem; color:#00ffcc; margin-top:2px; font-weight:normal;"></div></div>
         <div class="footer-btns"><button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button></div>
@@ -250,7 +250,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.2)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.3)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -381,6 +381,7 @@
 
     const IMAGEKIT_ENDPOINT = "https://ik.imagekit.io/cookingpollos";
     const IMAGEKIT_PUBLIC_KEY = "public_cVzOUvmm/nkPKK+AP3/S3BsoTCY=";
+    const IMAGEKIT_PRIVATE_KEY = "private_vhwHDX2dyMChQnZFqJ5ckBanen0=";
 
     async function uploadToImageKit(file) {
         if (!file) return null;
@@ -389,12 +390,26 @@
         formData.append("fileName", `${Date.now()}_${file.name.replace(/\s+/g, "_")}`);
         formData.append("publicKey", IMAGEKIT_PUBLIC_KEY);
         formData.append("useUniqueFileName", "true");
+        
+        const authHeader = "Basic " + btoa(IMAGEKIT_PRIVATE_KEY + ":");
+
         try {
-            const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", { method: "POST", body: formData });
+            const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", { 
+                method: "POST", 
+                headers: {
+                    "Authorization": authHeader
+                },
+                body: formData 
+            });
             const data = await res.json();
-            if (res.ok && data.url) return { url: data.url, fileId: data.fileId || "" };
-            throw new Error(data.message || "Error al subir en ImageKit");
-        } catch (e) { console.error("ImageKit error:", e); throw e; }
+            if (res.ok && data.url) {
+                return { url: data.url, fileId: data.fileId || "" };
+            }
+            throw new Error(data.message || "ImageKit rechazó la imagen.");
+        } catch (e) { 
+            console.error("ImageKit error:", e); 
+            throw new Error(e.message || "Error de conexión con la nube."); 
+        }
     }
 
     let cart = {}, total = 0, deliveryMode = "", isSelected = false, adminClicks = 0, adminTimeout, gpsCoords = "", cashPaidAmount = 0, changeNeeded = 0, currentPaymentMethod = "";
@@ -885,7 +900,7 @@
                 document.getElementById(`media-link-status-${idx}`).innerHTML = `<div style="margin-top:6px; text-align:right; font-size:0.75rem; color:#25D366; font-weight:bold;"><i class="fas fa-check-circle"></i> Archivo Vinculado <span style="color:#ea4335; cursor:pointer; margin-left:8px;" onclick="clearTextBannerMedia(${idx})">[Quitar]</span></div>`;
                 updateAdminTextBannerLive(idx, 'url', data.url); customAlert("¡Multimedia vinculado!", "Éxito");
             }
-        } catch (e) { customAlert("Fallo en la carga."); }
+        } catch (e) { customAlert("Fallo en la carga: " + e.message); }
     }
 
     async function uploadTextBannerFontFile(input, idx) {
@@ -897,7 +912,7 @@
                 document.getElementById(`font-link-status-${idx}`).innerHTML = `<div style="margin-top:6px; text-align:right; font-size:0.75rem; color:#0026ff; font-weight:bold;"><i class="fas fa-link"></i> Letra Guardada <span style="color:#25D366;">(Activa)</span> <span style="color:#ea4335; cursor:pointer; margin-left:8px;" onclick="clearTextBannerFont(${idx})">[Eliminar]</span></div>`;
                 updateAdminTextBannerLive(idx, 'fontUrl', data.url); customAlert("¡Tipografía registrada con éxito!", "Éxito");
             }
-        } catch (e) { customAlert("Error al procesar la letra."); }
+        } catch (e) { customAlert("Error al procesar la letra: " + e.message); }
     }
 
     function clearTextBannerMedia(idx) { window.localTextBannersArray[idx].url = ""; document.getElementById(`media-link-status-${idx}`).innerHTML = ""; updateAdminTextBannerLive(idx, 'url', ""); }
@@ -908,7 +923,7 @@
         try {
             const data = await uploadToImageKit(file);
             if (data && data.url) { window.localBannersArray[idx].url = data.url; await trackMediaInCloudGallery(data.url, data.fileId); renderAdminBannersUI(); renderAdminTextBannersUI(); customAlert("¡Multimedia cargado!", "¡Éxito!"); }
-        } catch (e) { customAlert("Error en la carga.", "Fallo"); }
+        } catch (e) { customAlert("Error en la carga: " + e.message, "Fallo"); }
     }
 
     function renderUserDynamicMenu() {
@@ -962,7 +977,7 @@
         try {
             const data = await uploadToImageKit(file);
             if (data && data.url) { window.localMenuArray[catIdx].products[prodIdx].img = data.url; await trackMediaInCloudGallery(data.url, data.fileId); renderAdminMenuUI(); customAlert("¡Archivo subido con éxito!", "¡Éxito!"); }
-        } catch (e) { customAlert("Fallo en la subida.", "Error"); }
+        } catch (e) { customAlert("Fallo en la subida: " + e.message, "Error"); }
     }
 
     async function uploadBgImage(input) {
@@ -970,7 +985,7 @@
         try {
             const data = await uploadToImageKit(file);
             if (data && data.url) { document.getElementById('input-bg-url').value = data.url; document.getElementById('btn-delete-bg').style.display = "inline-flex"; await trackMediaInCloudGallery(data.url, data.fileId); customAlert("¡Fondo cargado!", "Éxito"); }
-        } catch (e) { customAlert("Error."); }
+        } catch (e) { customAlert("Error: " + e.message); }
     }
 
     async function uploadProfileImage(input) {
@@ -978,7 +993,7 @@
         try {
             const data = await uploadToImageKit(file);
             if (data && data.url) { document.getElementById('input-profile-url').value = data.url; document.getElementById('btn-delete-profile').style.display = "inline-flex"; await trackMediaInCloudGallery(data.url, data.fileId); customAlert("¡Logo cargado!", "Éxito"); }
-        } catch (e) { customAlert("Error."); }
+        } catch (e) { customAlert("Error: " + e.message); }
     }
 
     function clearBgImage() { document.getElementById('input-bg-url').value = ""; document.getElementById('btn-delete-bg').style.display = "none"; }
