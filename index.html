@@ -42,7 +42,7 @@
         @keyframes ledStripPulse { 0% { border-color: #0026ff; box-shadow: 0 0 12px #0026ff, inset 0 0 4px #0026ff; } 25% { border-color: #00ffcc; box-shadow: 0 0 16px #00ffcc, inset 0 0 4px #00ffcc; } 50% { border-color: #ff00ff; box-shadow: 0 0 12px #ff00ff, inset 0 0 4px #ff00ff; } 75% { border-color: #3300ff; box-shadow: 0 0 16px #3300ff, inset 0 0 4px #3300ff; } 100% { border-color: #0026ff; box-shadow: 0 0 12px #0026ff, inset 0 0 4px #0026ff; } }
         .promo-led-container { background: rgba(11, 11, 11, 0.95); border: 2px solid #0026ff; padding: 16px; margin: 0 auto 25px auto; border-radius: 14px; text-align: left; box-sizing: border-box; animation: ledStripPulse 4s linear infinite; }
         .text-banner-container { background: rgba(11, 11, 11, 0.95); border: 2px solid #0026ff; padding: 16px; margin: 0 auto 20px auto; border-radius: 14px; box-sizing: border-box; animation: ledStripPulse 4s linear infinite; display: flex; flex-direction: column; gap: 14px; height: auto !important; width: 100%; overflow: hidden; }
-        .text-banner-content { width: 100%; text-align: center; font-weight: bold; word-wrap: break-word; display: block; }
+        .text-banner-content { width: 100%; text-align: center; font-weight: bold; word-break: normal; word-wrap: normal; overflow-wrap: normal; display: block; }
         .char-master-wrapper { position: relative; display: inline-block; vertical-align: middle; white-space: nowrap; }
         .char-layer-led { position: absolute; top: 0; left: 0; color: transparent !important; pointer-events: none; z-index: 1; white-space: nowrap; }
         .char-layer-stroke { position: absolute; top: 0; left: 0; color: transparent !important; pointer-events: none; z-index: 5; white-space: nowrap; }
@@ -131,7 +131,7 @@
             <a id="link-tk" class="social-row-btn" href="#" target="_blank" style="color: #ffffff;"><i class="fab fa-tiktok"></i> <span id="text-tk" style="color:white;">TikTok</span></a>
         </div>
     </div>
-    <p class="version-tag">Versión 14.5</p>
+    <p class="version-tag">Versión 14.6</p>
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span><div id="express-fee-badge" style="display:none; font-size:0.8rem; color:#00ffcc; margin-top:2px; font-weight:normal;"></div></div>
         <div class="footer-btns"><button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button></div>
@@ -250,7 +250,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.5)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.6)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -701,6 +701,27 @@
 
     function toggleTimeInputs(day) { let status = document.getElementById(`input-${day}-status`).value; document.getElementById(`row-times-${day}`).style.display = (status === 'cerrado') ? 'none' : 'inline-flex'; }
 
+    function generateBannerTextHTML(t) {
+        if (!t.text || t.text.trim() === "") return "";
+        let strokeSize = parseInt(t.strokeSize) || 0, strokeColor = t.strokeColor || "#000000", textColor = t.textColor || "#ffffff", lineHeightValue = (t.lineHeight || 140) / 100, computedSize = calcFontPixelSize(t.fontSize || 24), letterSpacingParam = (t.letterSpacing || 0) + "px";
+        let strokeParam = strokeSize > 0 ? `${strokeSize}px` : '0px', animClass = t.ledStroke ? 'led-stroke-mov' : '', ledStrokeWidth = (strokeSize > 0 ? (strokeSize * 2 + 4) : 4) + "px";
+        
+        let lines = (t.text || "").split("\n");
+        let innerCharsHtml = lines.map(line => {
+            let words = line.split(" ");
+            return words.map(word => {
+                let wordChars = Array.from(word).map(char => {
+                    let isEmoji = false; try { isEmoji = /\p{Extended_Pictographic}/u.test(char) || /\p{Emoji_Presentation}/u.test(char); } catch(e) { isEmoji = char.codePointAt(0) > 0xFFFF; }
+                    if (isEmoji) return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam}; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;">${char}</span>`;
+                    return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam};"><span class="char-layer-led ${animClass}" style="-webkit-text-stroke: ${ledStrokeWidth} #0026ff; display: ${t.ledStroke ? 'block' : 'none'};">${char}</span><span class="char-layer-stroke" style="-webkit-text-stroke: ${strokeParam} ${strokeColor}; display: ${strokeSize > 0 ? 'block' : 'none'};">${char}</span><span class="char-layer-fill" style="color: ${textColor};">${char}</span></span>`;
+                }).join("");
+                return `<span style="display: inline-block; white-space: nowrap;">${wordChars}</span>`;
+            }).join(`<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam};">&nbsp;</span>`);
+        }).join("<br>");
+
+        return `<div class="text-banner-content" style="font-size: ${computedSize}px; line-height: ${lineHeightValue};">${innerCharsHtml}</div>`;
+    }
+
     function renderMainPageBanners() {
         let container = document.getElementById('banners-main-container'); if (!container) return; container.innerHTML = "";
         let activeTexts = window.localTextBannersArray.filter(t => t.active), sequenceList = [];
@@ -725,20 +746,7 @@
                     div.style.fontFamily = fontFaceName;
                 } else div.style.fontFamily = "inherit";
 
-                let textBlockHtml = "";
-                if (t.text && t.text.trim() !== "") {
-                    let strokeSize = parseInt(t.strokeSize) || 0, strokeColor = t.strokeColor || "#000000", textColor = t.textColor || "#ffffff", lineHeightValue = (t.lineHeight || 140) / 100, computedSize = calcFontPixelSize(t.fontSize || 24), letterSpacingParam = (t.letterSpacing || 0) + "px";
-                    let strokeParam = strokeSize > 0 ? `${strokeSize}px` : '0px', animClass = t.ledStroke ? 'led-stroke-mov' : '', ledStrokeWidth = (strokeSize > 0 ? (strokeSize * 2 + 4) : 4) + "px";
-                    let charsArray = Array.from(t.text || "");
-                    let innerCharsHtml = charsArray.map(char => {
-                        if (char === "\n") return "<br>";
-                        if (char === " ") return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam};">&nbsp;</span>`;
-                        let isEmoji = false; try { isEmoji = /\p{Extended_Pictographic}/u.test(char) || /\p{Emoji_Presentation}/u.test(char); } catch(e) { isEmoji = char.codePointAt(0) > 0xFFFF; }
-                        if (isEmoji) return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam}; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;">${char}</span>`;
-                        return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam};"><span class="char-layer-led ${animClass}" style="-webkit-text-stroke: ${ledStrokeWidth} #0026ff; display: ${t.ledStroke ? 'block' : 'none'};">${char}</span><span class="char-layer-stroke" style="-webkit-text-stroke: ${strokeParam} ${strokeColor}; display: ${strokeSize > 0 ? 'block' : 'none'};">${char}</span><span class="char-layer-fill" style="color: ${textColor};">${char}</span></span>`;
-                    }).join("");
-                    textBlockHtml = `<div class="text-banner-content" style="font-size: ${computedSize}px; line-height: ${lineHeightValue};">${innerCharsHtml}</div>`;
-                }
+                let textBlockHtml = generateBannerTextHTML(t);
 
                 let mediaBlockHtml = "";
                 if (t.url) {
@@ -882,20 +890,9 @@
                 }
                 previewDiv.style.fontFamily = fontFaceName;
             } else previewDiv.style.fontFamily = "inherit";
-            let textBlockHtml = "";
-            if (t.text && t.text.trim() !== "") {
-                let strokeSize = parseInt(t.strokeSize) || 0, strokeColor = t.strokeColor || "#000000", textColor = t.textColor || "#ffffff", lineHeightValue = (t.lineHeight || 140) / 100, computedSize = calcFontPixelSize(t.fontSize || 24), letterSpacingParam = (t.letterSpacing || 0) + "px";
-                let strokeParam = strokeSize > 0 ? `${strokeSize}px` : '0px', animClass = t.ledStroke ? 'led-stroke-mov' : '', ledStrokeWidth = (strokeSize > 0 ? (strokeSize * 2 + 4) : 4) + "px";
-                let charsArray = Array.from(t.text || "");
-                let innerCharsHtml = charsArray.map(char => {
-                    if (char === "\n") return "<br>";
-                    if (char === " ") return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam};">&nbsp;</span>`;
-                    let isEmoji = false; try { isEmoji = /\p{Extended_Pictographic}/u.test(char) || /\p{Emoji_Presentation}/u.test(char); } catch(e) { isEmoji = char.codePointAt(0) > 0xFFFF; }
-                    if (isEmoji) return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam}; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;">${char}</span>`;
-                    return `<span class="char-master-wrapper" style="margin-right: ${letterSpacingParam};"><span class="char-layer-led ${animClass}" style="-webkit-text-stroke: ${ledStrokeWidth} #0026ff; display: ${t.ledStroke ? 'block' : 'none'};">${char}</span><span class="char-layer-stroke" style="-webkit-text-stroke: ${strokeParam} ${strokeColor}; display: ${strokeSize > 0 ? 'block' : 'none'};">${char}</span><span class="char-layer-fill" style="color: ${textColor};">${char}</span></span>`;
-                }).join("");
-                textBlockHtml = `<div class="text-banner-content" style="font-size: ${computedSize}px; line-height: ${lineHeightValue};">${innerCharsHtml}</div>`;
-            }
+            
+            let textBlockHtml = generateBannerTextHTML(t);
+
             let mediaBlockHtml = "";
             if (t.url) {
                 let isVideo = t.url.toLowerCase().includes('.mp4') || t.url.toLowerCase().includes('.webm') || t.url.toLowerCase().includes('.mov');
@@ -1286,3 +1283,4 @@
 </script>
 </body>
 </html>
+
