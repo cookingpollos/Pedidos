@@ -495,19 +495,11 @@
         } catch (e) { return 'dev_temp_' + Math.random().toString(36).substring(2, 9); }
     }
 
-    function renderRatingWidget() {
-        let devId = getDeviceId(), keys = Object.keys(window.ratingsData || {}), count = keys.length, sum = 0;
-        keys.forEach(k => sum += (parseInt(window.ratingsData[k]) || 0));
-        let avg = count > 0 ? (sum / count).toFixed(1) : "0.0";
-
-        let summaryEl = document.getElementById('rating-summary-text');
-        if (summaryEl) summaryEl.innerHTML = `Promedio: ⭐ <b style="color:#ffcc00; font-size:1rem;">${avg}</b> / 5.0 (${count} ${count === 1 ? 'valoración' : 'valoraciones'})`;
-
-        let userVote = window.ratingsData[devId] || 0;
+    function highlightStars(count) {
         let starBtns = document.querySelectorAll('#stars-interactive-container .star-btn');
         starBtns.forEach(btn => {
             let starVal = parseInt(btn.getAttribute('data-star'));
-            if (userVote > 0 ? starVal <= userVote : starVal <= Math.round(avg)) {
+            if (starVal <= count) {
                 btn.style.color = '#ffcc00';
                 btn.style.textShadow = '0 0 8px rgba(255,204,0,0.6)';
             } else {
@@ -515,6 +507,37 @@
                 btn.style.textShadow = 'none';
             }
         });
+    }
+
+    function initStarHoverEvents() {
+        let container = document.getElementById('stars-interactive-container');
+        if (!container || container.dataset.hoverInit) return;
+        container.dataset.hoverInit = "true";
+        
+        let starBtns = container.querySelectorAll('.star-btn');
+        starBtns.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                let starVal = parseInt(btn.getAttribute('data-star'));
+                highlightStars(starVal);
+            });
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            renderRatingWidget();
+        });
+    }
+
+    function renderRatingWidget() {
+        let devId = getDeviceId(), keys = Object.keys(window.ratingsData || {}), count = keys.length, sum = 0;
+        keys.forEach(k => sum += (parseInt(window.ratingsData[k]) || 0));
+        let avgNum = count > 0 ? (sum / count) : 0;
+        let avgStr = count > 0 ? avgNum.toFixed(1) : "0.0";
+
+        let summaryEl = document.getElementById('rating-summary-text');
+        if (summaryEl) summaryEl.innerHTML = `Promedio: ⭐ <b style="color:#ffcc00; font-size:1rem;">${avgStr}</b> / 5.0 (${count} ${count === 1 ? 'valoración' : 'valoraciones'})`;
+
+        let userVote = window.ratingsData[devId] || 0;
+        highlightStars(userVote > 0 ? userVote : Math.round(avgNum));
 
         let fb = document.getElementById('rating-user-feedback');
         if (fb) {
@@ -525,23 +548,35 @@
                 fb.style.display = 'none';
             }
         }
+        initStarHoverEvents();
     }
 
     function submitRating(stars) {
         let devId = getDeviceId();
         if (!window.ratingsData) window.ratingsData = {};
-        window.ratingsData[devId] = stars;
-        db.collection("configuraciones").doc("cooking-pollos").set({
-            ratings_map: window.ratingsData
-        }, { merge: true }).then(() => {
+        
+        // Guardar en colección pública 'calificaciones' para evitar conflicto de permisos en 'configuraciones'
+        db.collection("calificaciones").doc(devId).set({
+            rating: stars,
+            timestamp: Date.now()
+        }).then(() => {
+            window.ratingsData[devId] = stars;
             let fb = document.getElementById('rating-user-feedback');
             if (fb) {
                 fb.innerText = `¡Gracias por darnos ${stars} ⭐!`;
                 fb.style.display = 'block';
             }
             renderRatingWidget();
-        }).catch(() => {
-            customAlert("No se pudo registrar la calificación en la nube.", "Error");
+        }).catch((err) => {
+            // Intentar guardado alternativo en el documento maestro por compatibilidad
+            db.collection("configuraciones").doc("cooking-pollos").set({
+                ratings_map: { [devId]: stars }
+            }, { merge: true }).then(() => {
+                window.ratingsData[devId] = stars;
+                renderRatingWidget();
+            }).catch(() => {
+                customAlert("No se pudo registrar la calificación en la nube.", "Error");
+            });
         });
     }
 
@@ -726,6 +761,17 @@
         daysOrder.forEach(day => { htmlSchedule += `<div class="schedule-config-row"><span class="schedule-day-label">${daysNames[day]}:</span><select id="input-${day}-status" class="schedule-select" onchange="toggleTimeInputs('${day}')"><option value="abierto">Abierto</option><option value="cerrado">Cerrado</option></select><div id="row-times-${day}" style="display:inline-flex; align-items:center; gap:4px;"><input type="text" id="input-${day}-open" class="schedule-time-input" placeholder="11:30 AM"><span style="font-size:0.75rem; color:#aaa;">a</span><input type="text" id="input-${day}-close" class="schedule-time-input" placeholder="10:00 PM"></div></div>`; });
         scheduleContainer.innerHTML = htmlSchedule; registrarVisitaAnalytics();
 
+        // Listener en tiempo real para calificaciones públicas
+        db.collection("calificaciones").onSnapshot((snapshot) => {
+            let rMap = {};
+            snapshot.forEach(doc => {
+                let d = doc.data();
+                if (d && d.rating) rMap[doc.id] = d.rating;
+            });
+            window.ratingsData = rMap;
+            renderRatingWidget();
+        }, (e) => {});
+
         db.collection("configuraciones").doc("cooking-pollos").onSnapshot((doc) => {
             if (doc.exists) {
                 let data = doc.data();
@@ -744,7 +790,10 @@
                 window.localBannersArray = data.banners || []; window.localTextBannersArray = data.text_banners || [];
                 window.localDeliveryRanges = data.delivery_ranges || [{ min: 0, max: 2, price: 1000 }, { min: 2, max: 4, price: 1500 }, { min: 4, max: 6, price: 2000 }];
                 window.globalGalleryArray = (data.gallery_media || []).map(item => (typeof item === 'string') ? { url: item, public_id: "" } : item);
-                window.ratingsData = data.ratings_map || {};
+                
+                if (data.ratings_map && Object.keys(data.ratings_map).length > 0) {
+                    window.ratingsData = Object.assign({}, data.ratings_map, window.ratingsData);
+                }
 
                 renderRatingWidget();
                 renderUserDynamicMenu(); renderMainPageBanners(); renderAdminBannersUI(); renderAdminTextBannersUI(); renderAdminDeliveryRangesUI();
@@ -1071,7 +1120,6 @@
                 if (isVideo) mediaHtml = `<video src="${prod.img}" class="item-img" autoplay loop muted playsinline onclick="zoomImg(this.src, true)"></video>`;
                 else mediaHtml = `<img src="${prod.img || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=200&auto=format&fit=crop'}" class="item-img" onclick="zoomImg(this.src, false)">`;
                 
-                // Filtro para mostrar descripción SOLO si existe y no contiene la frase por defecto
                 let rawDesc = (prod.desc || "").trim();
                 let lowerDesc = rawDesc.toLowerCase();
                 let hasRealDesc = rawDesc !== "" && !lowerDesc.includes("indícanos") && !lowerDesc.includes("indicanos");
