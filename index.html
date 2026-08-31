@@ -495,6 +495,13 @@
         } catch (e) { return 'dev_temp_' + Math.random().toString(36).substring(2, 9); }
     }
 
+    function getUserRating() {
+        let devId = getDeviceId();
+        let localVote = localStorage.getItem('cp_user_rating');
+        if (localVote) return parseInt(localVote);
+        return window.ratingsData[devId] || 0;
+    }
+
     function highlightStars(count) {
         let starBtns = document.querySelectorAll('#stars-interactive-container .star-btn');
         starBtns.forEach(btn => {
@@ -528,7 +535,17 @@
     }
 
     function renderRatingWidget() {
-        let devId = getDeviceId(), keys = Object.keys(window.ratingsData || {}), count = keys.length, sum = 0;
+        let devId = getDeviceId();
+        let localVote = getUserRating();
+        
+        if (localVote > 0) {
+            if (!window.ratingsData) window.ratingsData = {};
+            window.ratingsData[devId] = localVote;
+        }
+
+        let keys = Object.keys(window.ratingsData || {});
+        let count = keys.length;
+        let sum = 0;
         keys.forEach(k => sum += (parseInt(window.ratingsData[k]) || 0));
         let avgNum = count > 0 ? (sum / count) : 0;
         let avgStr = count > 0 ? avgNum.toFixed(1) : "0.0";
@@ -536,13 +553,12 @@
         let summaryEl = document.getElementById('rating-summary-text');
         if (summaryEl) summaryEl.innerHTML = `Promedio: ⭐ <b style="color:#ffcc00; font-size:1rem;">${avgStr}</b> / 5.0 (${count} ${count === 1 ? 'valoración' : 'valoraciones'})`;
 
-        let userVote = window.ratingsData[devId] || 0;
-        highlightStars(userVote > 0 ? userVote : Math.round(avgNum));
+        highlightStars(localVote > 0 ? localVote : Math.round(avgNum));
 
         let fb = document.getElementById('rating-user-feedback');
         if (fb) {
-            if (userVote > 0) {
-                fb.innerText = `Tu voto actual: ${userVote} ⭐ (Podés cambiarlo cuando gustes)`;
+            if (localVote > 0) {
+                fb.innerText = `Tu voto registrado: ${localVote} ⭐ (Podés cambiarlo haciendo clic en otra estrella)`;
                 fb.style.display = 'block';
             } else {
                 fb.style.display = 'none';
@@ -555,28 +571,26 @@
         let devId = getDeviceId();
         if (!window.ratingsData) window.ratingsData = {};
         
-        // Guardar en colección pública 'calificaciones' para evitar conflicto de permisos en 'configuraciones'
+        // 1. Guardar de forma inmediata en el almacenamiento local
+        localStorage.setItem('cp_user_rating', stars);
+        window.ratingsData[devId] = stars;
+        
+        // 2. Renderizar respuesta visual al instante en la interfaz
+        let fb = document.getElementById('rating-user-feedback');
+        if (fb) {
+            fb.innerText = `¡Gracias por tu calificación de ${stars} ⭐!`;
+            fb.style.display = 'block';
+        }
+        renderRatingWidget();
+
+        // 3. Guardar en la nube silenciosamente sin interrumpir con ventanas de error si falla la conexión
         db.collection("calificaciones").doc(devId).set({
             rating: stars,
             timestamp: Date.now()
-        }).then(() => {
-            window.ratingsData[devId] = stars;
-            let fb = document.getElementById('rating-user-feedback');
-            if (fb) {
-                fb.innerText = `¡Gracias por darnos ${stars} ⭐!`;
-                fb.style.display = 'block';
-            }
-            renderRatingWidget();
-        }).catch((err) => {
-            // Intentar guardado alternativo en el documento maestro por compatibilidad
-            db.collection("configuraciones").doc("cooking-pollos").set({
-                ratings_map: { [devId]: stars }
-            }, { merge: true }).then(() => {
-                window.ratingsData[devId] = stars;
-                renderRatingWidget();
-            }).catch(() => {
-                customAlert("No se pudo registrar la calificación en la nube.", "Error");
-            });
+        }, { merge: true }).catch(() => {
+            db.collection("configuraciones").doc("cooking-pollos").update({
+                [`ratings_map.${devId}`]: stars
+            }).catch(() => {});
         });
     }
 
@@ -761,14 +775,17 @@
         daysOrder.forEach(day => { htmlSchedule += `<div class="schedule-config-row"><span class="schedule-day-label">${daysNames[day]}:</span><select id="input-${day}-status" class="schedule-select" onchange="toggleTimeInputs('${day}')"><option value="abierto">Abierto</option><option value="cerrado">Cerrado</option></select><div id="row-times-${day}" style="display:inline-flex; align-items:center; gap:4px;"><input type="text" id="input-${day}-open" class="schedule-time-input" placeholder="11:30 AM"><span style="font-size:0.75rem; color:#aaa;">a</span><input type="text" id="input-${day}-close" class="schedule-time-input" placeholder="10:00 PM"></div></div>`; });
         scheduleContainer.innerHTML = htmlSchedule; registrarVisitaAnalytics();
 
-        // Listener en tiempo real para calificaciones públicas
+        // Escuchador dinámico de calificaciones
         db.collection("calificaciones").onSnapshot((snapshot) => {
             let rMap = {};
             snapshot.forEach(doc => {
                 let d = doc.data();
                 if (d && d.rating) rMap[doc.id] = d.rating;
             });
-            window.ratingsData = rMap;
+            let localVote = localStorage.getItem('cp_user_rating');
+            let devId = getDeviceId();
+            window.ratingsData = Object.assign({}, window.ratingsData, rMap);
+            if (localVote) window.ratingsData[devId] = parseInt(localVote);
             renderRatingWidget();
         }, (e) => {});
 
@@ -793,6 +810,9 @@
                 
                 if (data.ratings_map && Object.keys(data.ratings_map).length > 0) {
                     window.ratingsData = Object.assign({}, data.ratings_map, window.ratingsData);
+                    let localVote = localStorage.getItem('cp_user_rating');
+                    let devId = getDeviceId();
+                    if (localVote) window.ratingsData[devId] = parseInt(localVote);
                 }
 
                 renderRatingWidget();
