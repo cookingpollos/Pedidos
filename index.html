@@ -16,11 +16,20 @@
         body.modal-lock { overflow: hidden !important; height: 100vh !important; touch-action: none; }
         body { background-color: #0b0b0b; color: #ffffff; font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding-bottom: 240px; background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat; transition: background 0.5s ease; }
         .container { max-width: 500px; margin: 0 auto; padding: 20px; text-align: center; position: relative; }
-        header { padding: 40px 0 30px; }
+        header { padding: 40px 0 20px; }
         .header-title { letter-spacing: 2px; font-size: 2.2rem; margin: 0; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         .badge-horario { position: absolute; top: 20px; left: 20px; background: rgba(17,17,17,0.85); border: 1px solid #333; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; }
         .badge-horario:hover { background: rgba(30,30,30,0.95); transform: scale(1.03); }
         .dot-status { width: 8px; height: 8px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
+        
+        /* Módulo de Calificación por Estrellas */
+        .rating-box { background: rgba(17,17,17,0.85); border: 1px solid #333; border-radius: 14px; padding: 12px 16px; margin: 10px auto 20px auto; backdrop-filter: blur(5px); text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .rating-stars { display: inline-flex; gap: 8px; font-size: 1.5rem; color: #444; cursor: pointer; margin: 8px 0 4px 0; user-select: none; }
+        .rating-stars .star-btn { transition: color 0.2s, transform 0.2s; cursor: pointer; }
+        .rating-stars .star-btn:hover { transform: scale(1.2); }
+        .rating-summary { font-size: 0.85rem; color: #ccc; font-weight: bold; }
+        .rating-user-feedback { font-size: 0.78rem; color: #00ffcc; margin-top: 4px; font-weight: 600; }
+
         .nota-uso { background-color: rgba(17, 17, 17, 0.9); border: 2px dashed #0026ff; padding: 15px; margin: 20px auto; border-radius: 10px; text-align: left; }
         .nota-uso strong { color: #0026ff; display: block; margin-bottom: 5px; }
         .name-input { width: 100%; background: #0f0f0f; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; margin-top: 15px; box-sizing: border-box; outline: none; font-size: 1rem; }
@@ -28,11 +37,12 @@
         .category-btn { background-color: rgba(17, 17, 17, 0.9); color: #fff; width: 100%; padding: 15px; margin-bottom: 10px; border: 1px solid #333; border-radius: 12px; text-align: left; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .category-content { display: none; background: rgba(22, 22, 22, 0.95); padding: 15px; border-radius: 0 0 12px 12px; border: 1px solid #333; border-top: none; margin-top: -10px; margin-bottom: 15px; }
         .menu-item { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid #222; padding-bottom: 12px; }
-        .item-main { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; }
+        .item-main { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; }
         .item-img { width: 75px; height: 75px; border-radius: 10px; object-fit: cover; background-color: #222; cursor: zoom-in; border: 1px solid #333; flex-shrink: 0; }
         .item-info { text-align: left; flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
         .item-title { font-weight: bold; font-size: 0.95rem; color: #fff; word-break: break-word; }
         .item-price { color: #0026ff; font-weight: bold; font-size: 0.85rem; }
+        .item-desc-text { font-size: 0.8rem; color: #bbb; line-height: 1.35; margin-top: 3px; word-break: break-word; }
         .item-controls { display: flex; align-items: center; gap: 5px; flex-shrink: 0; user-select: none; }
         .btn-qty { background: #333; border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
         .qty-input { width: 45px; height: 28px; background: transparent; border: 1px solid #444; color: white; text-align: center; border-radius: 4px; font-weight: bold; font-size: 1rem; flex-shrink: 0; }
@@ -119,6 +129,21 @@
         <img id="main-profile-img" src="" style="display:none; max-width: 220px; max-height: 160px; object-fit: contain; margin: 0 auto 15px; border-radius: 0; border: none; background: transparent;">
         <h1 class="header-title" id="main-title">Conectando con Google...</h1>
     </header>
+
+    <!-- Módulo de Calificación por Estrellitas -->
+    <div class="rating-box" id="rating-widget">
+        <div style="font-size: 0.78rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;"><i class="fas fa-star" style="color:#ffcc00;"></i> Calificá tu Experiencia</div>
+        <div class="rating-stars" id="stars-interactive-container">
+            <i class="fas fa-star star-btn" data-star="1" onclick="submitRating(1)"></i>
+            <i class="fas fa-star star-btn" data-star="2" onclick="submitRating(2)"></i>
+            <i class="fas fa-star star-btn" data-star="3" onclick="submitRating(3)"></i>
+            <i class="fas fa-star star-btn" data-star="4" onclick="submitRating(4)"></i>
+            <i class="fas fa-star star-btn" data-star="5" onclick="submitRating(5)"></i>
+        </div>
+        <div class="rating-summary" id="rating-summary-text">Promedio: ⭐ <b>0.0</b> / 5.0 (0 valoraciones)</div>
+        <div class="rating-user-feedback" id="rating-user-feedback" style="display:none;"></div>
+    </div>
+
     <div id="banners-main-container"></div>
     <div class="nota-uso"><strong>⚠️ NOTA IMPORTANTE:</strong><span>• <b>Si estás en casa:</b> Seleccioná tus productos y envianos tu pedido por WhatsApp.<br>• <b>Si estás en el local:</b> Consultá el menú aquí. Haz tu pedido en la caja por favor.</span></div>
     <div id="main-dynamic-menu-container"><p style="color:#aaa; font-style:italic; padding:20px;">Cargando menú en tiempo real...</p></div>
@@ -131,7 +156,7 @@
             <a id="link-tk" class="social-row-btn" href="#" target="_blank" style="color: #ffffff;"><i class="fab fa-tiktok"></i> <span id="text-tk" style="color:white;">TikTok</span></a>
         </div>
     </div>
-    <p class="version-tag">Versión 14.6</p>
+    <p class="version-tag">Versión 14.8</p>
     <div class="cart-footer">
         <div class="total-container">Total Orden: ₡<span id="grand-total">0</span><div id="express-fee-badge" style="display:none; font-size:0.8rem; color:#00ffcc; margin-top:2px; font-weight:normal;"></div></div>
         <div class="footer-btns"><button class="btn-ticket" onclick="showTicket()">📋 Ver Detalle</button></div>
@@ -250,7 +275,7 @@
 
 <div id="adminModal" class="modal-overlay" onclick="closeModals()">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.6)</h3>
+        <h3 style="margin-top:0; color: #0026ff; text-align: center;"><i class="fas fa-cogs"></i> Configuración Cloud (v14.8)</h3>
         
         <div class="admin-section-title"><i class="fas fa-chart-line"></i> Estadísticas de Visitas del Negocio</div>
         <div style="background: rgba(0, 38, 255, 0.08); border: 1px solid #0026ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -417,7 +442,7 @@
     window.localDeliveryRanges = [{ min: 0, max: 2, price: 1000 }, { min: 2, max: 4, price: 1500 }, { min: 4, max: 6, price: 2000 }];
     let currentGlobalWhatsApp = "85135269", currentGlobalTitle = "Web Pedidos", currentGlobalPin = "1234";
     const daysOrder = ['lu', 'ma', 'mi', 'ju', 'vi', 'sa', 'do'], daysNames = { lu: "Lunes", ma: "Martes", mi: "Miércoles", ju: "Jueves", vi: "Viernes", sa: "Sábado", do: "Domingo" }, monthNamesEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    window.currentScheduleData = {}; window.localMenuArray = []; window.adminExpandedCats = {}; window.localBannersArray = []; window.localTextBannersArray = []; window.globalGalleryArray = []; window.rawOrdersList = [];
+    window.currentScheduleData = {}; window.localMenuArray = []; window.adminExpandedCats = {}; window.localBannersArray = []; window.localTextBannersArray = []; window.globalGalleryArray = []; window.rawOrdersList = []; window.ratingsData = {};
     let calViewDate = new Date(), calSelStart = null, calSelEnd = null, galleryTarget = { type: '', catIdx: null, prodIdx: null, bannerIdx: null }, modalStack = [];
 
     function checkModalLock() { document.body.classList.toggle('modal-lock', modalStack.length > 0); }
@@ -468,6 +493,56 @@
             if (!id) { id = 'dev_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now(); localStorage.setItem('cp_device_id', id); }
             return id;
         } catch (e) { return 'dev_temp_' + Math.random().toString(36).substring(2, 9); }
+    }
+
+    function renderRatingWidget() {
+        let devId = getDeviceId(), keys = Object.keys(window.ratingsData || {}), count = keys.length, sum = 0;
+        keys.forEach(k => sum += (parseInt(window.ratingsData[k]) || 0));
+        let avg = count > 0 ? (sum / count).toFixed(1) : "0.0";
+
+        let summaryEl = document.getElementById('rating-summary-text');
+        if (summaryEl) summaryEl.innerHTML = `Promedio: ⭐ <b style="color:#ffcc00; font-size:1rem;">${avg}</b> / 5.0 (${count} ${count === 1 ? 'valoración' : 'valoraciones'})`;
+
+        let userVote = window.ratingsData[devId] || 0;
+        let starBtns = document.querySelectorAll('#stars-interactive-container .star-btn');
+        starBtns.forEach(btn => {
+            let starVal = parseInt(btn.getAttribute('data-star'));
+            if (userVote > 0 ? starVal <= userVote : starVal <= Math.round(avg)) {
+                btn.style.color = '#ffcc00';
+                btn.style.textShadow = '0 0 8px rgba(255,204,0,0.6)';
+            } else {
+                btn.style.color = '#444';
+                btn.style.textShadow = 'none';
+            }
+        });
+
+        let fb = document.getElementById('rating-user-feedback');
+        if (fb) {
+            if (userVote > 0) {
+                fb.innerText = `Tu voto actual: ${userVote} ⭐ (Podés cambiarlo cuando gustes)`;
+                fb.style.display = 'block';
+            } else {
+                fb.style.display = 'none';
+            }
+        }
+    }
+
+    function submitRating(stars) {
+        let devId = getDeviceId();
+        if (!window.ratingsData) window.ratingsData = {};
+        window.ratingsData[devId] = stars;
+        db.collection("configuraciones").doc("cooking-pollos").set({
+            ratings_map: window.ratingsData
+        }, { merge: true }).then(() => {
+            let fb = document.getElementById('rating-user-feedback');
+            if (fb) {
+                fb.innerText = `¡Gracias por darnos ${stars} ⭐!`;
+                fb.style.display = 'block';
+            }
+            renderRatingWidget();
+        }).catch(() => {
+            customAlert("No se pudo registrar la calificación en la nube.", "Error");
+        });
     }
 
     function registrarVisitaAnalytics() {
@@ -658,18 +733,20 @@
                 daysOrder.forEach(day => {
                     window.currentScheduleData[day + '_status'] = data[day + '_status'] || "abierto";
                     window.currentScheduleData[day + '_open'] = data[day + '_open'] || "11:00 AM";
-                    window.currentScheduleData[day + '_close'] = data[day + '_close'] || "11:00 PM";
+                    window.currentScheduleData[day + '_close'] = data[day + '_close'] || "10:00 PM";
                     document.getElementById(`input-${day}-status`).value = window.currentScheduleData[day + '_status'];
                     document.getElementById(`input-${day}-open`).value = window.currentScheduleData[day + '_open'];
                     document.getElementById(`input-${day}-close`).value = window.currentScheduleData[day + '_close'];
                     toggleTimeInputs(day);
                 });
                 ejecutarEvaluadorCalendarioCR();
-                window.localMenuArray = (data.menu && data.menu.length > 0) ? data.menu : [{ name: "🍗 Pollo Frito", products: [{ name: "Pieza de Pollo", price: 1950, desc: "indicanos tu comentario", img: "" }] }];
+                window.localMenuArray = (data.menu && data.menu.length > 0) ? data.menu : [{ name: "🍗 Pollo Frito", products: [{ name: "Pieza de Pollo", price: 1950, desc: "", img: "" }] }];
                 window.localBannersArray = data.banners || []; window.localTextBannersArray = data.text_banners || [];
                 window.localDeliveryRanges = data.delivery_ranges || [{ min: 0, max: 2, price: 1000 }, { min: 2, max: 4, price: 1500 }, { min: 4, max: 6, price: 2000 }];
                 window.globalGalleryArray = (data.gallery_media || []).map(item => (typeof item === 'string') ? { url: item, public_id: "" } : item);
+                window.ratingsData = data.ratings_map || {};
 
+                renderRatingWidget();
                 renderUserDynamicMenu(); renderMainPageBanners(); renderAdminBannersUI(); renderAdminTextBannersUI(); renderAdminDeliveryRangesUI();
 
                 let mTitle = document.getElementById('main-title'); if (currentGlobalTitle.trim() !== "") { mTitle.innerText = currentGlobalTitle; mTitle.style.display = "block"; } else mTitle.style.display = "none";
@@ -993,7 +1070,14 @@
                 let isVideo = prod.img && (prod.img.toLowerCase().includes('.mp4') || prod.img.toLowerCase().includes('.webm') || prod.img.toLowerCase().includes('.mov'));
                 if (isVideo) mediaHtml = `<video src="${prod.img}" class="item-img" autoplay loop muted playsinline onclick="zoomImg(this.src, true)"></video>`;
                 else mediaHtml = `<img src="${prod.img || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=200&auto=format&fit=crop'}" class="item-img" onclick="zoomImg(this.src, false)">`;
-                html += `<div class="menu-item"><div class="item-main">${mediaHtml}<div class="item-info"><span class="item-title">${prod.name}</span><span class="item-price">₡${prod.price.toLocaleString('en-US')}</span></div><div class="item-controls"><button class="btn-qty" onclick="changeQty('${cartKey}', '${prod.name.replace(/'/g, "\\'")}', -1, ${prod.price})">-</button><input type="number" id="qty-${catIdx}-${prodIdx}" class="qty-input" value="${safeQty}" onchange="manualQty('${cartKey}', '${prod.name.replace(/'/g, "\\'")}', this.value, ${prod.price})"><button class="btn-qty" onclick="changeQty('${cartKey}', '${prod.name.replace(/'/g, "\\'")}', 1, ${prod.price})">+</button></div></div><input type="text" id="note-${prod.name}" class="item-note" placeholder="${prod.desc || 'indicanos tu comentario'}"></div>`;
+                
+                // Filtro para mostrar descripción SOLO si existe y no contiene la frase por defecto
+                let rawDesc = (prod.desc || "").trim();
+                let lowerDesc = rawDesc.toLowerCase();
+                let hasRealDesc = rawDesc !== "" && !lowerDesc.includes("indícanos") && !lowerDesc.includes("indicanos");
+                let descHtml = hasRealDesc ? `<div class="item-desc-text">${prod.desc}</div>` : '';
+
+                html += `<div class="menu-item"><div class="item-main">${mediaHtml}<div class="item-info"><span class="item-title">${prod.name}</span><span class="item-price">₡${prod.price.toLocaleString('en-US')}</span>${descHtml}</div><div class="item-controls"><button class="btn-qty" onclick="changeQty('${cartKey}', '${prod.name.replace(/'/g, "\\'")}', -1, ${prod.price})">-</button><input type="number" id="qty-${catIdx}-${prodIdx}" class="qty-input" value="${safeQty}" onchange="manualQty('${cartKey}', '${prod.name.replace(/'/g, "\\'")}', this.value, ${prod.price})"><button class="btn-qty" onclick="changeQty('${cartKey}', '${prod.name.replace(/'/g, "\\'")}', 1, ${prod.price})">+</button></div></div><input type="text" id="note-${prod.name}" class="item-note" placeholder="Indícanos tus comentarios o instrucciones para este producto..."></div>`;
             });
             html += `</div>`;
         });
@@ -1013,7 +1097,11 @@
                     let isVideo = prod.img.toLowerCase().includes('.mp4') || prod.img.toLowerCase().includes('.webm') || prod.img.toLowerCase().includes('.mov');
                     thumbHtml = isVideo ? `<video src="${prod.img}" autoplay loop muted playsinline style="width:36px; height:36px; object-fit:cover; border-radius:4px; border:1px solid #555;"></video>` : `<img src="${prod.img}" style="width:36px; height:36px; object-fit:cover; border-radius:4px; border:1px solid #555;">`;
                 }
-                html += `<div class="admin-prod-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(0,0,0,0.3); padding:6px; border-radius:4px;"><span style="font-size:0.75rem; color:#aaa; font-weight:bold;">Producto #${prodIdx + 1}</span><div style="display:flex; gap:4px;"><button class="btn-qty" style="width:28px; height:28px;" onclick="moveProduct(${catIdx}, ${prodIdx}, -1)" ${prodIdx === 0 ? 'disabled style="opacity:0.2;"' : ''}><i class="fas fa-arrow-up"></i></button><button class="btn-qty" style="width:28px; height:28px;" onclick="moveProduct(${catIdx}, ${prodIdx}, 1)" ${prodIdx === cat.products.length - 1 ? 'disabled style="opacity:0.2;"' : ''}><i class="fas fa-arrow-down"></i></button></div></div><div class="admin-field"><label>Nombre del Producto</label><input type="text" class="admin-input" value="${prod.name}" onchange="updateLocalProdField(${catIdx}, ${prodIdx}, 'name', this.value)"></div><div class="admin-field"><label>Precio (₡)</label><input type="number" class="admin-input" value="${prod.price}" onchange="updateLocalProdField(${catIdx}, ${prodIdx}, 'price', this.value)"></div><div class="admin-field"><label>Comentario sugerido</label><input type="text" class="admin-input" value="${prod.desc || ''}" onchange="updateLocalProdField(${catIdx}, ${prodIdx}, 'desc', this.value)"></div><div class="admin-field"><label>Imagen / Video del Producto</label><div style="display:flex; gap:8px; margin-top:4px;"><button class="btn-ticket" style="flex:1;" onclick="triggerFileInput('file-prod-input-${catIdx}-${prodIdx}')"><i class="fas fa-upload"></i> Dispositivo</button><button class="btn-ticket" style="background:#0026ff; border-color:#0026ff; flex:1;" onclick="openCloudGallery('product', ${catIdx}, ${prodIdx}, null)"><i class="fas fa-cloud"></i> Nube</button><input type="file" id="file-prod-input-${catIdx}-${prodIdx}" accept="image/*,video/*" onchange="convertAndSaveImage(this, ${catIdx}, ${prodIdx})" style="display:none;"></div><div style="margin-top:6px; text-align:right;">${thumbHtml}</div></div><button class="btn-admin-delete" onclick="deleteLocalProduct(${catIdx}, ${prodIdx})" style="width:100%; height:28px; font-size:0.75rem;"><i class="fas fa-minus-circle"></i> Eliminar Producto</button></div>`;
+                let cleanDescValue = prod.desc || '';
+                if (cleanDescValue.toLowerCase().includes("indícanos") || cleanDescValue.toLowerCase().includes("indicanos")) {
+                    cleanDescValue = '';
+                }
+                html += `<div class="admin-prod-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(0,0,0,0.3); padding:6px; border-radius:4px;"><span style="font-size:0.75rem; color:#aaa; font-weight:bold;">Producto #${prodIdx + 1}</span><div style="display:flex; gap:4px;"><button class="btn-qty" style="width:28px; height:28px;" onclick="moveProduct(${catIdx}, ${prodIdx}, -1)" ${prodIdx === 0 ? 'disabled style="opacity:0.2;"' : ''}><i class="fas fa-arrow-up"></i></button><button class="btn-qty" style="width:28px; height:28px;" onclick="moveProduct(${catIdx}, ${prodIdx}, 1)" ${prodIdx === cat.products.length - 1 ? 'disabled style="opacity:0.2;"' : ''}><i class="fas fa-arrow-down"></i></button></div></div><div class="admin-field"><label>Nombre del Producto</label><input type="text" class="admin-input" value="${prod.name}" onchange="updateLocalProdField(${catIdx}, ${prodIdx}, 'name', this.value)"></div><div class="admin-field"><label>Precio (₡)</label><input type="number" class="admin-input" value="${prod.price}" onchange="updateLocalProdField(${catIdx}, ${prodIdx}, 'price', this.value)"></div><div class="admin-field"><label>Descripción / Contenido del Platillo (Opcional)</label><input type="text" class="admin-input" value="${cleanDescValue}" placeholder="Ej: Incluye 2 piezas de pollo, papas y refresco..." onchange="updateLocalProdField(${catIdx}, ${prodIdx}, 'desc', this.value)"></div><div class="admin-field"><label>Imagen / Video del Producto</label><div style="display:flex; gap:8px; margin-top:4px;"><button class="btn-ticket" style="flex:1;" onclick="triggerFileInput('file-prod-input-${catIdx}-${prodIdx}')"><i class="fas fa-upload"></i> Dispositivo</button><button class="btn-ticket" style="background:#0026ff; border-color:#0026ff; flex:1;" onclick="openCloudGallery('product', ${catIdx}, ${prodIdx}, null)"><i class="fas fa-cloud"></i> Nube</button><input type="file" id="file-prod-input-${catIdx}-${prodIdx}" accept="image/*,video/*" onchange="convertAndSaveImage(this, ${catIdx}, ${prodIdx})" style="display:none;"></div><div style="margin-top:6px; text-align:right;">${thumbHtml}</div></div><button class="btn-admin-delete" onclick="deleteLocalProduct(${catIdx}, ${prodIdx})" style="width:100%; height:28px; font-size:0.75rem;"><i class="fas fa-minus-circle"></i> Eliminar Producto</button></div>`;
             });
             html += `</div></div>`;
         });
@@ -1025,7 +1113,7 @@
     function toggleAdminCat(catIdx) { window.adminExpandedCats[catIdx] = !window.adminExpandedCats[catIdx]; renderAdminMenuUI(); }
     function addAdminCategory() { window.localMenuArray.unshift({ name: "Nueva Categoría", products: [] }); renderAdminMenuUI(); }
     function deleteLocalCategory(catIdx) { window.localMenuArray.splice(catIdx, 1); renderAdminMenuUI(); }
-    function addLocalProduct(catIdx) { if(!window.localMenuArray[catIdx].products) window.localMenuArray[catIdx].products = []; window.localMenuArray[catIdx].products.push({ name: "Nuevo Producto", price: 0, desc: "indicanos tu comentario", img: "" }); renderAdminMenuUI(); }
+    function addLocalProduct(catIdx) { if(!window.localMenuArray[catIdx].products) window.localMenuArray[catIdx].products = []; window.localMenuArray[catIdx].products.push({ name: "Nuevo Producto", price: 0, desc: "", img: "" }); renderAdminMenuUI(); }
     function deleteLocalProduct(catIdx, prodIdx) { window.localMenuArray[catIdx].products.splice(prodIdx, 1); renderAdminMenuUI(); }
     function updateLocalCatName(catIdx, val) { window.localMenuArray[catIdx].name = val; }
     function updateLocalProdField(catIdx, prodIdx, field, val) { if(field === 'price') val = parseFloat(val) || 0; window.localMenuArray[catIdx].products[prodIdx][field] = val; }
@@ -1163,7 +1251,7 @@
             señas_local: document.getElementById('input-señas-local').value.trim(), description: document.getElementById('input-description').value.trim(), fb: document.getElementById('input-fb').value.trim(),
             fb_name: document.getElementById('input-fb-name').value.trim(), ig: document.getElementById('input-ig').value.trim(), ig_name: document.getElementById('input-ig-name').value.trim(),
             tk: document.getElementById('input-tk').value.trim(), tk_name: document.getElementById('input-tk-name').value.trim(), banners: window.localBannersArray || [], text_banners: window.localTextBannersArray || [],
-            delivery_ranges: window.localDeliveryRanges || [], gallery_media: window.globalGalleryArray || []
+            delivery_ranges: window.localDeliveryRanges || [], gallery_media: window.globalGalleryArray || [], ratings_map: window.ratingsData || {}
         };
         daysOrder.forEach(day => {
             updateConfigObject[day + '_status'] = document.getElementById(`input-${day}-status`).value;
